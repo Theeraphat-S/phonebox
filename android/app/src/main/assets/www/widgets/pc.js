@@ -1,4 +1,4 @@
-import { $, API, D, PANEL_HEADERS, LOCALE, Q_STYLE, api, bridge, cfg, color, cssVar, rulesPaused, toggleRulesPause, fillIcon, fmtDur, fmtHM, fmtMem, gotoPageRef, gpuMem, gpusOf, h, haptic, openSheet, paceInfo, pad, pairedPcs, quotaProviders, r1, shortGpu, store, switchPc, t, tick, toast, transport } from '../main.js';
+import { icon, iconOf, $, API, D, PANEL_HEADERS, LOCALE, Q_STYLE, api, bridge, cfg, color, cssVar, rulesPaused, toggleRulesPause, fillIcon, fmtDur, fmtHM, fmtMem, gotoPageRef, gpuMem, gpusOf, h, haptic, openSheet, paceInfo, pad, pairedPcs, quotaProviders, r1, shortGpu, store, switchPc, t, tick, toast, transport } from '../main.js';
 import { W } from '../registry.js';
 import { canKillAnywhere, dialEl, every } from './helpers.js';
 
@@ -40,7 +40,7 @@ W.html = {
 };
 
 // Battery levels of the PC's wireless devices (agent: BatteryMonitor) and, optionally, the panel phone itself.
-export const BAT_ICONS = { headphones: '🎧', mouse: '🖱️', keyboard: '⌨️', controller: '🎮', laptop: '💻', pen: '🖊️', phone: '📱', other: '🔋' };
+export const BAT_ICONS = { headphones: 'headphones', mouse: 'mouse', keyboard: 'keyboard', controller: 'gamepad', laptop: 'laptop', pen: 'pen', phone: 'smartphone', other: 'battery-full' };
 W.batteries = {
   needs: ['tick'],
   create(box, { o }) {
@@ -62,10 +62,10 @@ W.batteries = {
       list.replaceChildren(...devices.map((d) => {
         const col = d.level <= low ? '#ef4444' : d.level <= low * 2 ? '#f59e0b' : '#22c55e';
         const row = h('div', 'bt-row' + (d.level <= low ? ' low' : ''),
-          h('span', 'bt-ico', BAT_ICONS[d.kind] || '🔋'),
+          h('span', 'bt-ico', icon(BAT_ICONS[d.kind] || 'battery-full')),
           h('span', 'bt-name', d.name),
           h('span', 'bt-bar', h('i')),
-          h('b', 'bt-pct', (d.charging ? '⚡' : '') + d.level + '%'));
+          h('b', 'bt-pct', d.charging ? icon('bolt', 'm t-warm') : null, d.level + '%'));
         row.style.setProperty('--c', col);
         row.style.setProperty('--v', d.level / 100);
         return row;
@@ -111,7 +111,7 @@ W.obs = {
       const kids = [
         h('div', 'obs-top', pill(s.streaming, 'LIVE', 'live', s.streamMs, 'stream'), pill(s.recording, recLabel, 'rec', s.recordPaused ? s.recordMs - since : s.recordMs, 'record')),
         h('div', 'obs-scene', h('span', null, 'Scene'), h('b', null, s.scene || '—'),
-          s.micMuted != null ? h('span', 'obs-mic' + (s.micMuted ? ' muted' : ''), s.micMuted ? '🔇' : '🎙️') : null),
+          s.micMuted != null ? h('span', 'obs-mic' + (s.micMuted ? ' muted' : ''), icon(s.micMuted ? 'mic-off' : 'mic')) : null),
       ];
       if (o.scenes !== false && s.scenes.length) {
         kids.push(h('div', 'obs-scenes', ...s.scenes.map((name) => {
@@ -172,10 +172,10 @@ W.discord = {
       const kids = [h('div', 'dc-top',
         h('span', 'dc-where', s.channelName ? `${s.channelName}` : t('w.discord.notInChannel')),
         s.channelKind ? h('span', 'dc-kind', s.channelKind) : null,
-        btn('mute', s.muted ? '🔇' : '🎙️', s.muted, 'mute'), btn('deaf', s.deafened ? '🔕' : '🎧', s.deafened, 'deafen'),
-        s.channelId ? btn('leave', '📞', false, 'leave') : null)];
+        btn('mute', icon(s.muted ? 'mic-off' : 'mic'), s.muted, 'mute'), btn('deaf', icon(s.deafened ? 'headphones-off' : 'headphones'), s.deafened, 'deafen'),
+        s.channelId ? btn('leave', icon('phone-hangup'), false, 'leave') : null)];
       if (s.channelId && s.members.length) {
-        kids.push(h('div', 'dc-members', ...s.members.map((m) => h('span', 'dc-member' + (m.deafened ? ' deaf' : m.muted ? ' muted' : ''), ico(m.avatar && img('user', m.id, m.avatar), m.name), (m.deafened ? '🔕 ' : m.muted ? '🔇 ' : '') + m.name))));
+        kids.push(h('div', 'dc-members', ...s.members.map((m) => h('span', 'dc-member' + (m.deafened ? ' deaf' : m.muted ? ' muted' : ''), ico(m.avatar && img('user', m.id, m.avatar), m.name), m.deafened ? icon('headphones-off', 'm') : m.muted ? icon('mic-off', 'm') : null, m.name))));
       }
       if (o.channels !== false && s.channels.length) {
         // one block per server; tap it to unfold its voice channels (the server you are in starts unfolded)
@@ -201,7 +201,7 @@ W.discord = {
           const block = h('div', 'dc-block' + (isOpen ? ' open' : ''), head);
           if (isOpen) {
             block.append(h('div', 'dc-chans', ...chans.map((c) => {
-              const b = h('button', 'dc-chan' + (c.id === s.channelId ? ' cur' : '') + (busy === 'join' + c.id ? ' busy' : ''), '🔊 ' + c.name);
+              const b = h('button', 'dc-chan' + (c.id === s.channelId ? ' cur' : '') + (busy === 'join' + c.id ? ' busy' : ''), icon('volume', 'm'), c.name);
               if (ctl && !busy && c.id !== s.channelId) b.addEventListener('click', () => act('join', c.id));
               return b;
             })));
@@ -222,13 +222,13 @@ W.discord = {
 // Home Assistant entities through the agent (which holds the token). Tap a light, switch, scene… to switch it,
 // when the widget allows it.
 export const HA_ICONS = {
-  light: '💡', switch: '🔌', fan: '🌀', cover: '🪟', media_player: '🎵', scene: '🎬', script: '📜', automation: '🤖',
-  climate: '🌡️', person: '🧑', vacuum: '🧹', camera: '📷', input_boolean: '🔘', button: '🔘', input_button: '🔘', sun: '☀️', weather: '⛅',
+  light: 'lightbulb', switch: 'plug', fan: 'fan', cover: 'window-frame', media_player: 'music', scene: 'clapperboard', script: 'scroll', automation: 'bot',
+  climate: 'thermometer', person: 'user', vacuum: 'broom', camera: 'camera', input_boolean: 'radio-button', button: 'radio-button', input_button: 'radio-button', sun: 'sun', weather: 'cloud-sun',
 };
 export const HA_CLASS_ICONS = {
-  temperature: '🌡️', humidity: '💧', power: '⚡', energy: '⚡', battery: '🔋', illuminance: '☀️', door: '🚪', garage_door: '🚪',
-  window: '🪟', motion: '🏃', occupancy: '🧍', presence: '🧍', moisture: '💧', smoke: '🔥', gas: '🔥', co2: '🫧', carbon_dioxide: '🫧',
-  pm25: '🌫️', connectivity: '📶', plug: '🔌', outlet: '🔌', lock: '🔒', sound: '🔊', vibration: '📳',
+  temperature: 'thermometer', humidity: 'droplets', power: 'bolt', energy: 'bolt', battery: 'battery-full', illuminance: 'sun', door: 'door-ajar', garage_door: 'door-ajar',
+  window: 'window-frame', motion: 'running', occupancy: 'user', presence: 'user', moisture: 'droplets', smoke: 'flame', gas: 'flame', co2: 'wind', carbon_dioxide: 'wind',
+  pm25: 'cloud-fog', connectivity: 'signal', plug: 'plug', outlet: 'plug', lock: 'lock', sound: 'volume', vibration: 'phone-vibrate',
 };
 export const HA_SWITCHABLE = new Set(['light', 'switch', 'fan', 'input_boolean', 'automation', 'siren', 'humidifier', 'group', 'cover', 'media_player',
   'scene', 'script', 'button', 'input_button', 'lock', 'vacuum']);
@@ -277,13 +277,13 @@ W.ha = {
       grid.replaceChildren(...data.entities.map((e) => {
         const dom = e.id.split('.')[0];
         const active = HA_ACTIVE.has(e.state);
-        const icon = dom === 'lock' ? (e.state === 'unlocked' ? '🔓' : '🔒') : HA_CLASS_ICONS[e.deviceClass] || HA_ICONS[dom] || '◻️';
+        const glyph = dom === 'lock' ? (e.state === 'unlocked' ? 'unlock' : 'lock') : HA_CLASS_ICONS[e.deviceClass] || HA_ICONS[dom] || 'square';
         const can = o.control === true && HA_SWITCHABLE.has(dom) && e.state !== 'unavailable';
         const tile = h('div', 'ha-tile' + (active ? ' on' : '') + (can ? ' can' : '') + (busy === e.id ? ' busy' : '') + (e.state === 'unavailable' ? ' gone' : ''),
-          h('span', 'ha-ico', icon), h('span', 'ha-name', e.name), h('b', 'ha-state', haState(e)));
+          h('span', 'ha-ico', iconOf(glyph)), h('span', 'ha-name', e.name), h('b', 'ha-state', haState(e)));
         if (can) tile.addEventListener('click', () => toggle(e));
         return tile;
-      }), ...(data.error ? [h('div', 'ha-err', '⚠ ' + data.error)] : []));
+      }), ...(data.error ? [h('div', 'ha-err', icon('warning-triangle', 'm'), data.error)] : []));
     };
     const tick = every(4000, async () => { await load(); render(); });
     return { update: () => { tick(); render(); } };
@@ -341,12 +341,12 @@ W.docker = {
           haptic(); open = open === c.id ? null : c.id; render(true);
         });
         if (open !== c.id) return row;
-        const btn = (label, action, cls = '') => {
-          const b = h('button', 'dk-btn ' + cls, label);
+        const btn = (glyph, label, action, cls = '') => {
+          const b = h('button', 'dk-btn ' + cls, icon(glyph, 'm'), label);
           b.addEventListener('click', (e) => { e.stopPropagation(); act(c, action); });
           return b;
         };
-        return h('div', 'dk-wrap', row, h('div', 'dk-acts', ...(c.state === 'running' ? [btn('↻ Restart', 'restart'), btn('■ Stop', 'stop', 'danger')] : [btn('▶ Start', 'start', 'go')])));
+        return h('div', 'dk-wrap', row, h('div', 'dk-acts', ...(c.state === 'running' ? [btn('refresh', 'Restart', 'restart'), btn('square', 'Stop', 'stop', 'danger')] : [btn('play', 'Start', 'start', 'go')])));
       }));
     };
     const tick = every(4000, async () => { await load(); render(); });
@@ -502,7 +502,7 @@ W.agenda = {
         rows.push(row);
       }
       const body = h('div', 'ag-list', ...(rows.length ? rows : [h('div', 'empty', `Nothing in the next ${days} days`)]));
-      box.replaceChildren(h('div', 'w-title', o.title || 'Agenda', cal.errors?.length ? h('span', 'ag-err', ' ⚠') : null), body);
+      box.replaceChildren(h('div', 'w-title', o.title || 'Agenda', cal.errors?.length ? h('span', 'ag-err', ' ', icon('warning-triangle')) : null), body);
       // drop rows that do not fit, keeping the day headers tidy
       while (body.scrollHeight > body.clientHeight + 2 && body.childElementCount > 1) {
         body.lastElementChild.remove();
@@ -534,9 +534,9 @@ W.onair = {
         const on = mic || cam || obsLive || pushed;
         box.classList.toggle('on', on);
         const apps = [...new Set([...(mic ? p.micApps || [] : []), ...(cam ? p.cameraApps || [] : [])])];
-        sub.textContent = on
-          ? [mic ? '🎙️' : '', cam ? '📷' : '', obsLive ? (obs.streaming ? 'OBS live' : 'OBS recording') : '', apps.join(', ') || (pushed && typeof pv === 'string' ? pv : '')].filter(Boolean).join(' ')
-          : (src === 'mic' || src === 'camera') && p && p.mic == null ? 'Not detectable on this computer' : 'Off air';
+        if (on) sub.replaceChildren(...(mic ? [icon('mic', 'm')] : []), ...(cam ? [icon('camera', 'm')] : []),
+          [obsLive ? (obs.streaming ? 'OBS live' : 'OBS recording') : '', apps.join(', ') || (pushed && typeof pv === 'string' ? pv : '')].filter(Boolean).join(' '));
+        else sub.textContent = (src === 'mic' || src === 'camera') && p && p.mic == null ? 'Not detectable on this computer' : 'Off air';
       },
     };
   },
@@ -553,7 +553,7 @@ W.battery = {
         const b = JSON.parse(bridge.battery());
         box.style.setProperty('--q', b.plugged ? '#22c55e' : b.level <= 20 ? '#ef4444' : b.level <= 40 ? '#f59e0b' : '#84cc16');
         dial.set(b.level, b.level, '%');
-        sub.textContent = (b.plugged ? '⚡ Charging' : 'On battery') + (b.temp ? ` · ${b.temp.toFixed(0)}°C` : '');
+        sub.replaceChildren(...(b.plugged ? [icon('bolt', 'm t-warm'), 'Charging'] : ['On battery']), b.temp ? ` · ${b.temp.toFixed(0)}°C` : '');
       } catch (_) {}
     });
     return { update: load };
@@ -580,7 +580,7 @@ W.pcswitch = {
         return;
       }
       row.replaceChildren(...pcs.map((pc) => {
-        const b = h('button', 'ov-pc' + (pc.active && !usb ? ' on' : ''), '🖥️ ' + (pc.name || t('panel.computer')));
+        const b = h('button', 'ov-pc' + (pc.active && !usb ? ' on' : ''), icon('monitor', 'm'), pc.name || t('panel.computer'));
         b.disabled = usb;
         b.addEventListener('click', (e) => { e.stopPropagation(); switchPc(pc); });
         return b;
@@ -664,7 +664,7 @@ W.volume = {
   needs: ['state'],
   create(box) {
     const fill = h('i'), bar = h('div', 'vb', fill), pct = h('div', 'vb-v', '--');
-    const mute = h('button', 'pb', '🔇'), down = h('button', 'pb', '−'), up = h('button', 'pb', '+');
+    const mute = h('button', 'pb', icon('volume-off')), down = h('button', 'pb', '−'), up = h('button', 'pb', '+');
     box.append(h('div', 'w-title', 'Volume'), h('div', 'vb-row', bar, pct), h('div', 'pomo-btns', mute, down, up));
     let dragging = false, timer = 0, level = 0;
     const vertical = () => box.clientHeight > box.clientWidth * 1.15;
@@ -703,9 +703,9 @@ W.volume = {
 };
 
 // The agent's automation rules: which hold right now, and a button to pause them all for an hour.
-const RULE_WHEN = { 'session-waiting': '✳️', 'session-busy': '⚙️', 'media-playing': '🎵', 'process-running': '🪟', 'mic-in-use': '🎙️', 'camera-in-use': '📷',
-  'obs-live': '🔴', 'calendar-event': '📆', 'cpu-above': '🔥', idle: '🌙', time: '🕙', push: '📡', 'quota-above': '🎯', 'review-requested': '👀',
-  'ci-failed': '❌', 'battery-low': '🔋', 'ping-high': '📶', always: '📅' };
+const RULE_WHEN = { 'session-waiting': 'asterisk', 'session-busy': 'settings', 'media-playing': 'music', 'process-running': 'window-frame', 'mic-in-use': 'mic', 'camera-in-use': 'camera',
+  'obs-live': 'record', 'calendar-event': 'calendar', 'cpu-above': 'flame', idle: 'moon', time: 'clock', push: 'radio', 'quota-above': 'target', 'review-requested': 'eye',
+  'ci-failed': 'x-circle', 'battery-low': 'battery-low', 'ping-high': 'signal', always: 'calendar-days' };
 W.rules = {
   needs: ['state'],
   create(box, { o }) {
@@ -721,14 +721,14 @@ W.rules = {
         const k = JSON.stringify([rules, active, paused]);
         if (k === key) return;
         key = k;
-        btn.textContent = paused ? '▶ Resume' : '⏸ Pause';
+        btn.replaceChildren(icon(paused ? 'play' : 'pause', 'm'), paused ? 'Resume' : 'Pause');
         btn.hidden = !D.state;
         box.classList.toggle('paused', !!paused);
         if (!rules.length) { list.replaceChildren(h('div', 'empty', 'Add rules in Settings › Rules')); return; }
         const sorted = [...rules].sort((a, b) => active.includes(b.id) - active.includes(a.id));
         list.replaceChildren(...(paused ? [h('div', 'ru-note', `Paused until ${fmtHM(new Date(rulesPaused))}`)] : []),
           ...sorted.map((r) => h('div', 'ru-row' + (active.includes(r.id) && !paused ? ' on' : ''),
-            h('span', 'ru-ico', RULE_WHEN[r.when] || '⚡'), h('span', 'ru-name', r.name || r.when), h('i', 'ru-dot'))));
+            h('span', 'ru-ico', icon(RULE_WHEN[r.when] || 'bolt', r.when === 'obs-live' ? 't-live' : '')), h('span', 'ru-name', r.name || r.when), h('i', 'ru-dot'))));
       },
     };
   },
@@ -756,7 +756,7 @@ W.chargecare = {
       if (!(b.level >= 0)) return;
       q('.cc-fg').style.strokeDasharray = `${(C * b.level) / 100} ${C}`;
       q('.cc-pct').textContent = b.level + '%';
-      q('.cc-state').textContent = b.plugged ? '⚡' : '🔋';
+      q('.cc-state').replaceChildren(icon(b.plugged ? 'bolt' : 'battery-full'));
       const col = b.level <= 20 ? '#ef4444' : ch.enabled && b.level > max ? '#f59e0b' : b.plugged ? '#22c55e' : 'rgb(var(--ambient))';
       box.style.setProperty('--cc', col);
       q('.cc-text').textContent = !ch.enabled ? `Battery care is off${b.temp ? ` · ${b.temp.toFixed(0)} °C` : ''}`

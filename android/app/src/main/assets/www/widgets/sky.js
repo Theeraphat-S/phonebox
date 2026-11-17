@@ -1,4 +1,4 @@
-import { $, D, DEFAULT_CFG, LOCALE, cfg, fmtDur, fmtHM, h, t, tick } from '../main.js';
+import { icon, $, D, DEFAULT_CFG, LOCALE, cfg, fmtDur, fmtHM, h, t, tick } from '../main.js';
 import { W } from '../registry.js';
 import { cached, every } from './helpers.js';
 
@@ -8,7 +8,7 @@ export function moonPhase(date) {
   const age = ((((date - Date.UTC(2000, 0, 6, 18, 14)) / 864e5) % syn) + syn) % syn;
   const names = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
   const i = Math.floor(((age + syn / 16) % syn) / (syn / 8));
-  return { name: names[i], icon: '🌑🌒🌓🌔🌕🌖🌗🌘'.match(/./gu)[i], illum: (1 - Math.cos((2 * Math.PI * age) / syn)) / 2 };
+  return { name: names[i], icon: ['moon-new', 'moon-waxing-crescent', 'moon-first-quarter', 'moon-waxing-gibbous', 'moon-full', 'moon-waning-gibbous', 'moon-last-quarter', 'moon-waning-crescent'][i], illum: (1 - Math.cos((2 * Math.PI * age) / syn)) / 2 };
 }
 
 W.sun = {
@@ -42,7 +42,7 @@ W.sun = {
         q('.sl').textContent = now < rise ? t('w.risesIn', { dur: fmtDur(rise - now) }) : now > set ? t('w.afterSunset') : t('w.lightLeft', { dur: fmtDur(set - now) });
         q('.w-sub').textContent = t('w.day') + ' ' + fmtDur((d.daylight_duration?.[0] ?? (set - rise) / 1000) * 1000) + (d.uv_index_max?.[0] != null ? ` · UV ${Math.round(d.uv_index_max[0])}` : '');
         const m = moonPhase(now);
-        q('.moon').textContent = `${m.icon} ${m.name} · ${Math.round(m.illum * 100)}%`;
+        q('.moon').replaceChildren(icon(m.icon, 'm'), `${m.name} · ${Math.round(m.illum * 100)}%`);
       },
     };
   },

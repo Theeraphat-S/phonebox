@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+**Panel and settings**
+- Emoji in the interface are replaced by IconMCP icons, drawn as inline SVG: they follow the text colour, look the
+  same on every device and work offline. Widgets, page tabs, shortcut keys, rule presets and the catalog use them.
+  An emoji or a few letters you typed yourself still works as an icon; the settings page has a new icon picker that
+  saves a built-in icon.
+
 ## 0.9.17 — 2026-11-17
 
 Shortcut keys with real icons, the settings page and widget catalog in Vietnamese, and a few panel fixes.

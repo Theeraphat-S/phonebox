@@ -38,7 +38,9 @@ header .ver { color: var(--muted); font-size: 12px; }
 .btn.danger { color: var(--danger); }
 .btn.sm { padding: 4px 9px; font-size: 12.5px; border-radius: 7px; }
 .icon-btn { border: 1px solid var(--line); background: var(--panel); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: grid; place-items: center; }
-.ico { width: 1em; height: 1em; vertical-align: -0.15em; flex: none; }
+.ico { width: 1em; height: 1em; vertical-align: -0.15em; flex: none; stroke-width: var(--ico-stroke, 1.5px); }
+/* IconMCP draws on a 16-unit grid; a non-scaling stroke keeps the line the same width (--ico-stroke) at every icon size. */
+.ico :is(path, line, circle, rect, ellipse) { vector-effect: non-scaling-stroke; }
 .ico.m { margin-right: 0.35em; }
 .icon-btn:disabled { opacity: .3; cursor: default; }
 
@@ -188,7 +190,10 @@ table.items td.val { font-family: Consolas, monospace; font-size: 12px; max-widt
 .swatches button { width: 22px; height: 22px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; }
 .swatches button.on { border-color: var(--text); }
 .emojis { display: flex; gap: 2px; flex-wrap: wrap; margin-top: 4px; }
-.emojis button { border: 0; background: none; font-size: 18px; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; }
+.emojis button { border: 0; background: none; color: var(--text); font-size: 18px; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: grid; place-items: center; }
+.emojis button .ico { width: 18px; height: 18px; vertical-align: 0; }
+.icon-prev { display: inline-grid; place-items: center; width: 34px; height: 34px; font-size: 20px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); flex: none; }
+.icon-details { margin-top: 6px; } .icon-details summary { cursor: pointer; font-size: 12px; color: var(--muted); }
 .emojis button:hover { background: var(--panel-2); }
 input[type=color] { width: 42px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); padding: 2px; }
 .icon-input { width: 70px; text-align: center; font-size: 20px; }
@@ -694,6 +699,7 @@ dd { margin: 0; word-break: break-all; }
 <div class="toast" id="toast"></div>
 <div class="modal" id="modal" hidden><div class="modal-box"><div id="modalBody"></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="modalClose" data-i18n="s.cancel">Cancel</button></div></div></div>
 
+<script src="../panel/icons.js"></script>
 <script src="../panel/i18n.js"></script>
 <script src="../panel/appearance.js"></script>
 <script>
@@ -712,35 +718,29 @@ const h = (tag, attrs = {}, ...kids) => {
   return e;
 };
 
-// Interface chrome uses Lucide icons (https://lucide.dev, ISC license) inlined below, so the page
-// works offline and needs no icon font on old WebViews. ISC license text:
-// Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT).
-// All other copyright (c) for Lucide are held by Lucide Contributors 2022.
-// Permission to use, copy, modify, and/or distribute this software for any purpose with or without
-// fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
-const ICONS = {
-  download: '<polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
-  upload: '<polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
-  'chevron-up': '<path d="m18 15-6-6-6 6"/>',
-  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
-  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
-  home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-  warn: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
-  zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
-  settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
-  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
-  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
-};
-// icon('download') → an inline <svg> in currentColor, sized in em so it follows text and theme.
-const icon = (name, cls = '') => {
-  const t = document.createElement('template');
-  t.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico${cls ? ' ' + cls : ''}" aria-hidden="true">${ICONS[name]}</svg>`;
-  return t.content.firstElementChild;
-};
+// Interface icons come from icons.js (IconMCP, MIT), the same inline SVG set as the phone's panel, so the page works
+// offline and needs no icon font. icon('download') → an inline <svg> in currentColor, sized in em so it follows text and theme.
+const icon = (name, cls = '') => window.PBIcons.el(name, cls);
+// A stored icon value (a shortcut's, a page's, a widget's) as a node: the SVG when it names an icon, the text itself otherwise.
+const iconOf = (value, cls = '') => window.PBIcons.node(value, cls);
 
 const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#e5b84b', '#84cc16', '#22c55e', '#14b8a6', '#0ea5e9', '#2f80ed', '#6366f1', '#a855f7', '#ec4899', '#d97757', '#64748b', '#9ca3af'];
-const EMOJIS = ['⌨️', '💻', '📁', '📝', '🌐', '🎧', '🎵', '💬', '📧', '📅', '🧮', '⚙️', '✂️', '📊', '🔇', '🔊', '🌙', '🔒', '🚀', '🐙', '🐳', '🧪', '🛠️', '📦', '🎮', '📷', '🎙️', '⭐', '✳️', '🦊'];
+// The text form of a stored icon, for places that cannot hold an <svg> (an <option>): an emoji stays, an icon name has none.
+const iconText = (value) => (window.PBIcons.nameOf(value) ? '' : value || '');
+// A stored icon value, then the text next to it — for a checkbox label or a heading.
+const withIcon = (value, text) => [value ? iconOf(value, 'm') : null, text];
+// An icon field: a preview, a box that takes an icon name ("icon:home"), an emoji or a few letters, and a grid of the
+// built-in icons to pick from. onPick(value) gets the new stored value.
+function iconPicker(value, onPick, { collapsed = false } = {}) {
+  const prev = h('span', { class: 'icon-prev' });
+  const input = h('input', { type: 'text', class: 'icon-input', value: value || '', maxlength: 32, title: t('s.z.icon'), oninput: (e) => { onPick(e.target.value); paint(); } });
+  const paint = () => prev.replaceChildren(iconOf(input.value || 'grid'));
+  paint();
+  const grid = h('div', { class: 'emojis' }, ...window.PBIcons.PICKER.map((name) => h('button', { type: 'button', title: name, onclick: () => {
+    input.value = window.PBIcons.PREFIX + name; onPick(input.value); paint();
+  } }, icon(name))));
+  return { input, prev, grid: collapsed ? h('details', { class: 'icon-details' }, h('summary', {}, t('s.z.icon')), grid) : grid };
+}
 let osName = 'windows';
 const PRESETS_LINUX = [
   ['', 'Pick a preset…'],
@@ -941,7 +941,7 @@ function renderPages() {
   list.replaceChildren(...cfg.pages.map((p, i) => {
     const row = h('div', { class: 'ptab' + (i === selPage ? ' on' : '') + (p.enabled === false ? ' off' : ''), draggable: 'true', 'data-i': i,
       onclick: () => { selPage = i; selWidget = -1; renderPages(); } },
-      h('span', { class: 'pt-num' }, String(i + 1)), h('span', { class: 'pt-ico' }, p.icon || '▫️'), h('span', { class: 'pt-name' }, p.title || '(untitled)'),
+      h('span', { class: 'pt-num' }, String(i + 1)), h('span', { class: 'pt-ico' }, iconOf(p.icon || 'grid')), h('span', { class: 'pt-name' }, p.title || '(untitled)'),
       h('span', { class: 'pt-n' }, String((p.widgets || []).length)));
     dragSort(row, cfg.pages, (from, to) => { selPage = to; renderPages(); changed(); });
     return row;
@@ -957,7 +957,7 @@ const isHome = (p) => (cfg.display.homePage ? cfg.display.homePage === p.id : cf
 function fillHomeSelect() {
   const sel = $('homePageSel');
   if (!sel) return;
-  sel.replaceChildren(h('option', { value: '' }, t('s.js.firstPage')), ...cfg.pages.filter((p) => p.id).map((p) => h('option', { value: p.id, selected: p.id === cfg.display.homePage }, `${p.icon || ''} ${p.title}`.trim())));
+  sel.replaceChildren(h('option', { value: '' }, t('s.js.firstPage')), ...cfg.pages.filter((p) => p.id).map((p) => h('option', { value: p.id, selected: p.id === cfg.display.homePage }, `${iconText(p.icon)} ${p.title}`.trim())));
   sel.value = cfg.display.homePage || '';
 }
 
@@ -968,10 +968,12 @@ function renderPageEditor() {
   if (!p) { $('peHead').replaceChildren(h('p', { class: 'lead' }, t('s.js.noPages'))); $('peRest').replaceChildren(); return; }
   p.widgets ??= [];
   const move = (d) => { const j = selPage + d; [cfg.pages[selPage], cfg.pages[j]] = [cfg.pages[j], cfg.pages[selPage]]; selPage = j; renderPages(); changed(); };
+  const pageIcon = iconPicker(p.icon, (v) => { p.icon = v; changed(); renderTabsOnly(); }, { collapsed: true });
   $('peHead').replaceChildren(
     h('div', { class: 'card' },
-      h('div', { class: 'row', style: { gap: '10px' } },
-        h('input', { type: 'text', class: 'icon-input', value: p.icon || '', maxlength: 8, title: 'Icon', oninput: (e) => { p.icon = e.target.value; changed(); renderTabsOnly(); } }),
+      pageIcon.grid,
+      h('div', { class: 'row', style: { gap: '10px', marginTop: '8px' } },
+        pageIcon.prev, pageIcon.input,
         h('input', { type: 'text', value: p.title || '', placeholder: t('s.js.pageName'), style: { flex: '1', fontSize: '16px', fontWeight: '600' }, oninput: (e) => { p.title = e.target.value; changed(); renderTabsOnly(); } }),
         h('label', { class: 'check', title: 'Show this page on the phone' }, h('label', { class: 'switch' },
           h('input', { type: 'checkbox', checked: p.enabled !== false, onchange: (e) => {
@@ -1062,7 +1064,7 @@ function renderTabsOnly() {
   cfg.pages.forEach((p, i) => {
     const t = tabs[i];
     if (!t) return;
-    t.querySelector('.pt-ico').textContent = p.icon || '▫️';
+    t.querySelector('.pt-ico').replaceChildren(iconOf(p.icon || 'grid'));
     t.querySelector('.pt-name').textContent = p.title || '(untitled)';
     t.classList.toggle('off', p.enabled === false);
   });
@@ -1076,7 +1078,7 @@ function renderCanvas() {
   p.widgets.forEach((w, i) => {
     const d = widgetDef(w.type);
     const el = h('div', { class: 'wb' + (i === selWidget ? ' sel' : ''), title: d.name },
-      h('div', { class: 'wb-in' }, h('span', { class: 'wb-ico' }, d.icon), h('b', {}, d.name), h('small', {}, widgetSummary(w))),
+      h('div', { class: 'wb-in' }, h('span', { class: 'wb-ico' }, iconOf(d.icon)), h('b', {}, d.name), h('small', {}, widgetSummary(w))),
       h('span', { class: 'rz', title: 'Resize' }));
     el.style.gridArea = `${w.y + 1} / ${w.x + 1} / span ${w.h} / span ${w.w}`;
     el.addEventListener('pointerdown', (e) => startDrag(e, w, i, e.target.classList.contains('rz') ? 'resize' : 'move'));
@@ -1157,7 +1159,7 @@ function renderPalette() {
       },
       onclick: () => addWidget(d)
     },
-      h('span', { class: 'pal-ico' }, d.icon), h('span', {}, h('b', {}, d.name), h('small', {}, d.desc))))]) : [h('p', { class: 'hint' }, t('s.js.noWidgetMatch'))]));
+      h('span', { class: 'pal-ico' }, iconOf(d.icon)), h('span', {}, h('b', {}, d.name), h('small', {}, d.desc))))]) : [h('p', { class: 'hint' }, t('s.js.noWidgetMatch'))]));
 }
 
 function addWidget(d) {
@@ -1185,7 +1187,7 @@ function renderInspector() {
     } }));
   box.replaceChildren(
     h('div', { class: 'row', style: { justifyContent: 'space-between', marginBottom: '8px' } },
-      h('h3', { style: { margin: 0 } }, `${d.icon} ${d.name}`),
+      h('h3', { style: { margin: 0 } }, ...withIcon(d.icon, d.name)),
       h('div', { class: 'row', style: { gap: '6px' } },
         h('button', { class: 'btn sm', onclick: () => {
           const spot = freeSpot(p, w.w, w.h, d.minW, d.minH);
@@ -1299,13 +1301,13 @@ function renderStackWidgetsOption(w, o) {
         checked: item.enabled,
         onchange: (e) => { e.stopPropagation(); item.enabled = e.target.checked; save(); }
       }),
-      h('span', { class: 'stack-row-ico' }, d.icon),
+      h('span', { class: 'stack-row-ico' }, iconOf(d.icon)),
       h('span', { class: 'stack-row-name', title: 'Click to edit settings' }, d.name),
       h('span', { class: 'stack-row-chevron', title: isOpen ? 'Close settings' : 'Open settings' }, icon(isOpen ? 'chevron-down' : 'chevron-right')),
       h('div', { class: 'stack-row-actions' },
         h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move up', disabled: i === 0, onclick: (e) => { e.stopPropagation(); move(i, i - 1); } }, icon('chevron-up')),
         h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move down', disabled: i === items.length - 1, onclick: (e) => { e.stopPropagation(); move(i, i + 1); } }, icon('chevron-down')),
-        h('button', { type: 'button', class: 'stack-btn-sm stack-btn-del', title: t('s.js.remove'), onclick: (e) => { e.stopPropagation(); remove(i); } }, icon('x'))
+        h('button', { type: 'button', class: 'stack-btn-sm stack-btn-del', title: t('s.js.remove'), onclick: (e) => { e.stopPropagation(); remove(i); } }, icon('close'))
       )
     );
     rowsAndConfigs.push(row);
@@ -1315,8 +1317,8 @@ function renderStackWidgetsOption(w, o) {
       const subOptions = (d.options || []).filter((opt) => opt.key !== 'widgets');
       const configBox = h('div', { class: 'stack-sub-config' },
         h('div', { class: 'stack-sub-header' },
-          h('span', { style: { fontWeight: '600', fontSize: '12px', color: 'var(--accent)' } }, icon('settings', 'm'), `${d.icon} ${d.name} settings`),
-          h('button', { type: 'button', class: 'stack-btn-sm', title: t('panel.close'), onclick: (e) => { e.stopPropagation(); activeStackSubIdx = -1; renderInspector(); } }, icon('x'))
+          h('span', { style: { fontWeight: '600', fontSize: '12px', color: 'var(--accent)' } }, icon('settings', 'm'), ...withIcon(d.icon, `${d.name} settings`)),
+          h('button', { type: 'button', class: 'stack-btn-sm', title: t('panel.close'), onclick: (e) => { e.stopPropagation(); activeStackSubIdx = -1; renderInspector(); } }, icon('close'))
         ),
         ...(subOptions.length > 0
           ? subOptions.map((subO) => optionField(subW, subO, (key, val) => {
@@ -1360,7 +1362,7 @@ function renderStackWidgetsOption(w, o) {
 
   const quickSelect = h('div', { class: 'row', style: { gap: '6px', marginTop: '8px' } },
     h('select', { id: 'stackQuickAdd', style: { flex: '1' } },
-      ...catalog.widgets.filter((cw) => !['stack', 'command'].includes(cw.type)).map((cw) => h('option', { value: cw.type }, `${cw.icon} ${cw.name}`))
+      ...catalog.widgets.filter((cw) => !['stack', 'command'].includes(cw.type)).map((cw) => h('option', { value: cw.type }, `${iconText(cw.icon)} ${cw.name}`.trim()))
     ),
     h('button', { type: 'button', class: 'btn sm', onclick: () => {
       const sel = $('stackQuickAdd');
@@ -1475,13 +1477,13 @@ function optionField(w, o, onValChange) {
         h('div', { class: 'swatches' }, ...COLORS.map((c) => h('button', { style: { background: c }, onclick: () => { set(o.key, c); renderInspector(); } })))));
     case 'shortcut':
       return field(h('select', { onchange: (e) => set(o.key, e.target.value) }, h('option', { value: '' }, '(first shortcut)'),
-        ...cfg.shortcuts.map((s) => h('option', { value: s.id, selected: s.id === v }, `${s.icon} ${s.label}`))),
+        ...cfg.shortcuts.map((s) => h('option', { value: s.id, selected: s.id === v }, `${iconText(s.icon)} ${s.label}`.trim()))),
         h('span', { class: 'hint' }, 'New shortcuts get their id when you save.'));
     case 'shortcuts': {
       const cur = () => { const x = optVal(w, o); return Array.isArray(x) ? x : []; };
       return field(h('div', { class: 'opts' }, ...cfg.shortcuts.map((s) => h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: cur().includes(s.id), onchange: (e) => {
         set(o.key, cfg.shortcuts.map((x) => x.id).filter((id) => (id === s.id ? e.target.checked : cur().includes(id))));
-      } }), `${s.icon} ${s.label}`))));
+      } }), ...withIcon(s.icon, s.label)))));
     }
     default:
       return field(h('input', { type: 'text', value: v ?? '', oninput: (e) => set(o.key, e.target.value) }),
@@ -1492,7 +1494,7 @@ function optionField(w, o, onValChange) {
 // ---- template picker: new page (index null) or replace the widgets of page <index>
 function miniMap(widgets) {
   return h('div', { class: 'mini' }, ...widgets.map((w) => {
-    const b = h('span', {}, widgetDef(w.type).icon);
+    const b = h('span', {}, iconOf(widgetDef(w.type).icon));
     b.style.gridArea = `${w.y + 1} / ${w.x + 1} / span ${w.h} / span ${w.w}`;
     return b;
   }));
@@ -1504,7 +1506,7 @@ function openTemplates(index) {
     // a template lists only what differs from the defaults; the rest is written out like for a widget added by hand
     for (const w of widgets) w.options = { ...defaultOptions(w.type), ...(w.options || {}) };
     if (index == null) {
-      cfg.pages.push({ id: '', title: t ? t.title : 'New page', icon: t ? t.icon : '▫️', enabled: true, widgets });
+      cfg.pages.push({ id: '', title: t ? t.title : 'New page', icon: t ? t.icon : 'icon:grid', enabled: true, widgets });
       selPage = cfg.pages.length - 1;
     } else {
       cfg.pages[index].widgets = widgets;
@@ -1516,7 +1518,7 @@ function openTemplates(index) {
     h('h3', {}, index == null ? 'New page' : `Replace the widgets of "${cfg.pages[index].title}"`),
     h('div', { class: 'tpl-grid' },
       h('button', { class: 'tpl', onclick: () => pick(null) }, h('div', { class: 'mini empty-mini' }, icon('plus')), h('b', {}, 'Blank page'), h('small', {}, 'Start from an empty grid.')),
-      ...catalog.templates.map((t) => h('button', { class: 'tpl', onclick: () => pick(t) }, miniMap(t.widgets), h('b', {}, `${t.icon} ${t.title}`), h('small', {}, t.desc)))));
+      ...catalog.templates.map((t) => h('button', { class: 'tpl', onclick: () => pick(t) }, miniMap(t.widgets), h('b', {}, ...withIcon(t.icon, t.title)), h('small', {}, t.desc)))));
   $('modal').hidden = false;
 }
 let onModalClose = null; // a dialog that has to clean up (the pairing code) sets this
@@ -1596,7 +1598,7 @@ function renderPhones() {
       h('div', { class: 'row' },
         h('input', { type: 'text', value: conf?.name || '', placeholder: ph.model || 'Phone', style: { maxWidth: '220px' }, oninput: (e) => { entry(ph.id).name = e.target.value; changed(); } }),
         h('span', { class: 'hint' }, `${ph.model || 'Android device'} · ${ago(ph.lastSeen)}${ph.via ? ' over ' + ph.via : ''}${wvMajor ? ' · WebView ' + wvMajor : ''}`)),
-      ph.webviewProblem ? h('p', { class: 'hint', style: { margin: '6px 0 0', color: 'var(--warn)' } }, icon('warn', 'm'), ph.webviewProblem) : null,
+      ph.webviewProblem ? h('p', { class: 'hint', style: { margin: '6px 0 0', color: 'var(--warn)' } }, icon('warning-triangle', 'm'), ph.webviewProblem) : null,
       h('label', { class: 'check', style: { marginTop: '8px' } },
         h('input', { type: 'checkbox', checked: all, onchange: (e) => { entry(ph.id).pages = e.target.checked ? null : cfg.pages.map((p) => p.id).filter(Boolean); changed(); renderPhones(); } }),
         'Shows all pages'),
@@ -1607,7 +1609,7 @@ function renderPhones() {
           if (e.target.checked) set.add(p.id); else set.delete(p.id);
           e2.pages = cfg.pages.map((x) => x.id).filter((id) => set.has(id));
           changed();
-        } }), `${p.icon || ''} ${p.title}`.trim()))));
+        } }), ...withIcon(p.icon, p.title)))));
   }));
 }
 
@@ -1797,32 +1799,32 @@ const DAYS = [['mon', 'Mo'], ['tue', 'Tu'], ['wed', 'We'], ['thu', 'Th'], ['fri'
 const PRIORITIES = { 2: 'low', 5: 'normal', 8: 'high' };
 const pageId = (...ids) => ids.find((id) => cfg.pages.some((p) => p.id === id)) || cfg.pages[0]?.id || '';
 const RULE_PRESETS = [
-  ['✳️ Claude needs me → AI page', () => ({ name: 'Claude needs me', when: 'session-waiting', then: 'goto', page: pageId('ai', 'work'), whileActive: true })],
-  ['🎵 Music plays → music page', () => ({ name: 'Music', when: 'media-playing', match: 'Spotify', then: 'goto', page: pageId('music', 'home'), whileActive: true })],
-  ['🔴 On air while the mic is on', () => (osName === 'macos'
+  ['asterisk', 'Claude needs me → AI page', () => ({ name: 'Claude needs me', when: 'session-waiting', then: 'goto', page: pageId('ai', 'work'), whileActive: true })],
+  ['music', 'Music plays → music page', () => ({ name: 'Music', when: 'media-playing', match: 'Spotify', then: 'goto', page: pageId('music', 'home'), whileActive: true })],
+  ['record', 'On air while the mic is on', () => (osName === 'macos'
     ? { name: 'On air', when: 'process-running', match: 'zoom.us|Microsoft Teams|FaceTime', then: 'push', key: 'onair', pushValue: 'On air', whileActive: true }
     : { name: 'On air', when: 'mic-in-use', then: 'notify', text: '{detail} is using the microphone', level: 'warn', whileActive: false })],
-  ['📆 In a meeting → on air', () => ({ name: 'In a meeting', when: 'calendar-event', then: 'push', key: 'onair', pushValue: '{detail}', whileActive: true })],
-  ['🔥 CPU busy → notification', () => ({ name: 'CPU busy', when: 'cpu-above', value: 90, then: 'notify', text: '{detail} for a while', level: 'warn', whileActive: false })],
-  ['🌙 Away → ambient page', () => ({ name: 'Away', when: 'idle', value: 10, then: 'goto', page: pageId('ambient', 'clock', 'calm'), whileActive: true })],
-  ['🕙 Evenings → calm page', () => ({ name: 'Evenings', when: 'time', match: '22:00-07:00', then: 'goto', page: pageId('calm', 'clock', 'ambient'), whileActive: true })],
-  ['🔔 Doorbell → notification', () => ({ name: 'Doorbell', when: 'push', match: 'doorbell', then: 'notify', text: 'Someone is at the door', level: 'warn', whileActive: false })],
-  ['🎯 Quota above 80 % → warning', () => ({ name: 'Quota', when: 'quota-above', value: 80, then: 'notify', text: '{detail}', level: 'warn', whileActive: false, cooldownMin: 60 })],
-  ['👀 Review requested → work page', () => ({ name: 'Review requested', when: 'review-requested', then: 'goto', page: pageId('work', 'devops'), whileActive: false, priority: 2, cooldownMin: 30, days: 'mon,tue,wed,thu,fri', during: '09:00-18:00' })],
-  ['❌ CI failed → notification', () => ({ name: 'CI failed', when: 'ci-failed', then: 'notify', text: '{detail}', level: 'error', whileActive: false })],
-  ['🌅 Workday mornings → daily page', () => ({ name: 'Morning', when: 'always', during: '08:30-09:30', days: 'mon,tue,wed,thu,fri', then: 'goto', page: pageId('daily', 'home'), whileActive: true, priority: 2 })],
-  ['🔋 Mouse battery low', () => ({ name: 'Battery low', when: 'battery-low', value: 15, then: 'notify', text: '{detail} — time to charge', level: 'warn', whileActive: false, cooldownMin: 240 })],
-  ['🌡️ Too warm (webhook value)', () => ({ name: 'Too warm', when: 'push', match: 'temperature', op: '>', arg: '28', then: 'notify', text: 'It is {detail} °C', level: 'warn', whileActive: false, cooldownMin: 60 })],
-  ['➕ Empty rule', () => ({ name: '', when: 'session-waiting', then: 'goto', page: pageId('home'), whileActive: true })],
+  ['calendar-days', 'In a meeting → on air', () => ({ name: 'In a meeting', when: 'calendar-event', then: 'push', key: 'onair', pushValue: '{detail}', whileActive: true })],
+  ['flame', 'CPU busy → notification', () => ({ name: 'CPU busy', when: 'cpu-above', value: 90, then: 'notify', text: '{detail} for a while', level: 'warn', whileActive: false })],
+  ['moon', 'Away → ambient page', () => ({ name: 'Away', when: 'idle', value: 10, then: 'goto', page: pageId('ambient', 'clock', 'calm'), whileActive: true })],
+  ['clock', 'Evenings → calm page', () => ({ name: 'Evenings', when: 'time', match: '22:00-07:00', then: 'goto', page: pageId('calm', 'clock', 'ambient'), whileActive: true })],
+  ['bell', 'Doorbell → notification', () => ({ name: 'Doorbell', when: 'push', match: 'doorbell', then: 'notify', text: 'Someone is at the door', level: 'warn', whileActive: false })],
+  ['target', 'Quota above 80 % → warning', () => ({ name: 'Quota', when: 'quota-above', value: 80, then: 'notify', text: '{detail}', level: 'warn', whileActive: false, cooldownMin: 60 })],
+  ['eye', 'Review requested → work page', () => ({ name: 'Review requested', when: 'review-requested', then: 'goto', page: pageId('work', 'devops'), whileActive: false, priority: 2, cooldownMin: 30, days: 'mon,tue,wed,thu,fri', during: '09:00-18:00' })],
+  ['x-circle', 'CI failed → notification', () => ({ name: 'CI failed', when: 'ci-failed', then: 'notify', text: '{detail}', level: 'error', whileActive: false })],
+  ['sunrise', 'Workday mornings → daily page', () => ({ name: 'Morning', when: 'always', during: '08:30-09:30', days: 'mon,tue,wed,thu,fri', then: 'goto', page: pageId('daily', 'home'), whileActive: true, priority: 2 })],
+  ['battery-low', 'Mouse battery low', () => ({ name: 'Battery low', when: 'battery-low', value: 15, then: 'notify', text: '{detail} — time to charge', level: 'warn', whileActive: false, cooldownMin: 240 })],
+  ['thermometer', 'Too warm (webhook value)', () => ({ name: 'Too warm', when: 'push', match: 'temperature', op: '>', arg: '28', then: 'notify', text: 'It is {detail} °C', level: 'warn', whileActive: false, cooldownMin: 60 })],
+  ['plus', 'Empty rule', () => ({ name: '', when: 'session-waiting', then: 'goto', page: pageId('home'), whileActive: true })],
 ];
 let activeRules = [];
 
 function renderRules() {
   cfg.rules ??= []; cfg.calendars ??= []; cfg.feeds ??= []; cfg.photos ??= { folder: '', subfolders: true }; cfg.console ??= { profiles: [] }; cfg.phones ??= []; cfg.homeAssistant ??= {}; cfg.obs ??= { enabled: false, url: 'ws://127.0.0.1:4455' }; cfg.discord ??= { enabled: false };
-  $('rulePresets').replaceChildren(...RULE_PRESETS.map(([label, make]) => h('button', { class: 'btn', onclick: () => {
+  $('rulePresets').replaceChildren(...RULE_PRESETS.map(([glyph, label, make]) => h('button', { class: 'btn', onclick: () => {
     cfg.rules.push({ id: '', enabled: true, ...make() });
     renderRules(); changed();
-  } }, label)));
+  } }, icon(glyph, 'm'), label)));
   const list = $('ruleList');
   if (!cfg.rules.length) { list.replaceChildren(h('p', { class: 'hint' }, t('s.r.noRules'))); return; }
   list.replaceChildren(...cfg.rules.map((r, i) => ruleCard(r, i)));
@@ -1844,12 +1846,12 @@ function ruleCard(r, i) {
   const act = [];
   if (r.then === 'goto') act.push(h('select', { onchange: (e) => set('page', e.target.value) },
     ...(cfg.pages.some((p) => p.id === r.page) ? [] : [h('option', { value: r.page || '', selected: true }, t('s.r.pickPage'))]),
-    ...cfg.pages.map((p) => h('option', { value: p.id, selected: p.id === r.page }, `${p.icon || ''} ${p.title}`.trim()))));
+    ...cfg.pages.map((p) => h('option', { value: p.id, selected: p.id === r.page }, `${iconText(p.icon)} ${p.title}`.trim()))));
   if (r.then === 'notify') act.push(text('text', t('s.r.textPlaceholder'), 'grow'),
     sel(r.level || 'info', { info: 'info', ok: 'ok', warn: 'warning', error: 'error' }, (v) => set('level', v)));
   if (r.then === 'push') act.push(text('key', t('s.r.keyPlaceholder')), text('pushValue', t('s.r.valuePlaceholder'), 'grow'));
   if (r.then === 'shortcut') act.push(h('select', { onchange: (e) => set('shortcut', e.target.value || null) }, h('option', { value: '' }, t('s.r.pickShortcut')),
-    ...(cfg.shortcuts || []).map((s) => h('option', { value: s.id, selected: s.id === r.shortcut }, `${s.icon || ''} ${s.label}`.trim()))));
+    ...(cfg.shortcuts || []).map((s) => h('option', { value: s.id, selected: s.id === r.shortcut }, `${iconText(s.icon)} ${s.label}`.trim()))));
 
   const num = (key, min, max, width = 64) => h('input', { type: 'number', min, max, style: `width:${width}px`, value: r[key] ?? '', placeholder: '0',
     oninput: (e) => set(key, e.target.value === '' ? (key === 'countdownSec' ? null : 0) : +e.target.value) });
@@ -1906,7 +1908,7 @@ async function pollRules() {
     const next = s.rules || [];
     rulesPausedUntil = s.rulesPaused || null;
     $('rulesPauseBtn').textContent = rulesPausedUntil ? t('s.r.resumeRules') : t('s.rules.pause1h');
-    $('rulesPausedState').textContent = rulesPausedUntil ? `⏸ Rules are paused until ${new Date(rulesPausedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
+    $('rulesPausedState').textContent = rulesPausedUntil ? `Rules are paused until ${new Date(rulesPausedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
       : 'Page switches count down on the phone and wait while you use it (General › Page switching).';
     if (next.join() !== activeRules.join()) { activeRules = next; if (!document.activeElement?.closest?.('#ruleList')) renderRules(); }
   } catch (_) {}
@@ -1924,7 +1926,7 @@ function renderCharge() {
   const sc = cfg.charge.method === 'shortcuts';
   $('chargeHa').hidden = sc; $('chargeOn').hidden = $('chargeOff').hidden = !sc;
   for (const [id, key] of [['chargeOnSel', 'onShortcut'], ['chargeOffSel', 'offShortcut']])
-    $(id).replaceChildren(h('option', { value: '' }, t('s.r.pickShortcut')), ...(cfg.shortcuts || []).map((s) => h('option', { value: s.id, selected: s.id === cfg.charge[key] }, `${s.icon || ''} ${s.label}`.trim())));
+    $(id).replaceChildren(h('option', { value: '' }, t('s.r.pickShortcut')), ...(cfg.shortcuts || []).map((s) => h('option', { value: s.id, selected: s.id === cfg.charge[key] }, `${iconText(s.icon)} ${s.label}`.trim())));
 }
 async function chargeTest(action) {
   if (JSON.stringify(cfg) !== saved) { toast(t('s.js.saveThenTest'), true); return; }
@@ -1940,7 +1942,7 @@ async function pollCharge() {
     const p = s.phone;
     const age = p ? Math.round((Date.now() - p.at) / 1000) : null;
     $('chargeState').replaceChildren(...(p
-      ? [`Phone: ${p.level}% `, ...(p.plugged ? [icon('zap', 'm'), 'charging'] : ['on battery']), ` (${age < 90 ? 'just now' : Math.round(age / 60) + ' min ago'})`]
+      ? [`Phone: ${p.level}% `, ...(p.plugged ? [icon('bolt', 'm'), 'charging'] : ['on battery']), ` (${age < 90 ? 'just now' : Math.round(age / 60) + ' min ago'})`]
       : ['No report from the phone yet']),
       s.power ? ` · power ${s.power}` : '', s.error ? ` · ${s.error}` : '');
   } catch (_) {}
@@ -2016,7 +2018,7 @@ function renderDeck() {
   cfg.shortcuts.forEach((s, i) => {
     const k = h('div', { class: 'key' + (i === selKey ? ' sel' : ''), draggable: 'true', 'data-i': i, style: { '--k': s.color || '#6b7280' },
       onclick: () => { selKey = i; renderDeck(); } },
-      h('span', { class: 'ki' }, s.icon || '•'), h('span', { class: 'kl' }, s.label || '(untitled)'));
+      h('span', { class: 'ki' }, iconOf(s.icon || '•')), h('span', { class: 'kl' }, s.label || '(untitled)'));
     k.style.setProperty('--k', s.color || '#6b7280');
     dragSort(k, cfg.shortcuts, (from, to) => { selKey = to; renderDeck(); changed(); });
     deck.append(k);
@@ -2026,7 +2028,7 @@ function renderDeck() {
 }
 
 function addShortcut() {
-  cfg.shortcuts.push({ id: '', label: 'New shortcut', icon: '⭐', color: '#0ea5e9', cmd: '' });
+  cfg.shortcuts.push({ id: '', label: 'New shortcut', icon: 'icon:star', color: '#0ea5e9', cmd: '' });
   selKey = cfg.shortcuts.length - 1;
   renderDeck();
   changed();
@@ -2044,7 +2046,7 @@ function renderEditor() {
     h('input', { type: 'text', value: s[key] ?? '', placeholder: ph, oninput: (e) => upd(key, e.target.value) }),
     hint ? h('span', { class: 'hint' }, hint) : null);
 
-  const iconIn = h('input', { type: 'text', class: 'icon-input', value: s.icon || '', maxlength: 8, oninput: (e) => upd('icon', e.target.value) });
+  const iconPick = iconPicker(s.icon, (v) => upd('icon', v));
   const colorIn = h('input', { type: 'color', value: s.color || '#6b7280', oninput: (e) => { upd('color', e.target.value); markSwatch(); } });
   const sw = h('div', { class: 'swatches' }, ...COLORS.map((c) => h('button', { title: c, style: { background: c }, 'data-c': c,
     onclick: () => { colorIn.value = c; upd('color', c); markSwatch(); } })));
@@ -2065,8 +2067,7 @@ function renderEditor() {
     h('div', { class: 'grid2' },
       h('div', {},
         text('label', t('s.k.label'), t('s.k.labelHint')),
-        h('div', { class: 'field' }, h('label', {}, t('s.z.iconEmoji')), h('div', { class: 'row' }, iconIn),
-          h('div', { class: 'emojis' }, ...EMOJIS.map((em) => h('button', { onclick: () => { iconIn.value = em; upd('icon', em); } }, em)))),
+        h('div', { class: 'field' }, h('label', {}, t('s.z.icon')), h('div', { class: 'row' }, iconPick.prev, iconPick.input), iconPick.grid),
         customIconField(s),
         h('div', { class: 'field' }, h('label', {}, t('s.z.colour')), h('div', { class: 'row' }, colorIn), sw)),
       h('div', {}, ...actionFields(s, upd, text, cmdIn, preset),
@@ -2185,7 +2186,7 @@ function renderDeckKeysOnly() {
     const k = keys[i];
     if (!k) return;
     k.style.setProperty('--k', s.color || '#6b7280');
-    k.querySelector('.ki').textContent = s.icon || '•';
+    k.querySelector('.ki').replaceChildren(iconOf(s.icon || '•'));
     k.querySelector('.kl').textContent = s.label || '(untitled)';
   });
 }
@@ -2313,7 +2314,7 @@ function renderControlSettings() {
             renderActions();
           }
         }),
-        h('span', { class: 'stack-row-ico' }, '📻'),
+        h('span', { class: 'stack-row-ico' }, icon('radio')),
         h('span', { class: 'stack-row-name', title: station.target || '' }, station.label || station.id),
         h('div', { class: 'stack-row-actions' },
           h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move up', disabled: !!q || idx === 0, onclick: (e) => { e.stopPropagation(); moveRadio(idx, idx - 1); } }, '▲'),
@@ -2677,9 +2678,9 @@ async function loadInfo() {
     $('adbFound').textContent = i.adb ? 'Found: ' + i.adb : 'adb not found — ' + ({ linux: 'sudo apt install adb', macos: 'brew install android-platform-tools' }[osName] || 'winget install Google.PlatformTools');
     $('appMissing').hidden = !(i.appMissing && i.appMissing.length);
     $('usbProblem').hidden = !i.usbProblem;
-    $('usbProblem').replaceChildren(...(i.usbProblem ? [icon('warn', 'm'), i.usbProblem] : []));
+    $('usbProblem').replaceChildren(...(i.usbProblem ? [icon('warning-triangle', 'm'), i.usbProblem] : []));
     $('webviewProblem').hidden = !i.webviewProblem;
-    $('webviewProblem').replaceChildren(...(i.webviewProblem ? [icon('warn', 'm'), i.webviewProblem] : []));
+    $('webviewProblem').replaceChildren(...(i.webviewProblem ? [icon('warning-triangle', 'm'), i.webviewProblem] : []));
     if (i.appMissing?.length) $('appMissingText').textContent = `${i.appMissing.join(', ')} has no PhoneBox app yet`;
     const sel = $('serial');
     const cur = cfg.deviceSerial || '';
@@ -2816,7 +2817,7 @@ $('modalClose').onclick = closeModal;
 $('lanPair').onclick = pairOverWifi;
 $('modal').onclick = (e) => { if (e.target.id === 'modal') closeModal(); };
 const whTry = (fn, ok) => async () => { try { await fn(); toast(ok); loadPushed(); } catch (e) { toast(e.message, true); } };
-$('whNotify').onclick = whTry(() => postJson('/api/notify', { title: 'PhoneBox', text: 'Hello from the settings page 👋', level: 'ok' }), 'Sent — look at the phone');
+$('whNotify').onclick = whTry(() => postJson('/api/notify', { title: 'PhoneBox', text: 'Hello from the settings page', level: 'ok' }), 'Sent — look at the phone');
 $('whPush').onclick = whTry(() => postJson('/api/push/demo', { value: Math.round(Math.random() * 100), unit: '%', sub: 'sent ' + new Date().toLocaleTimeString() }), 'Pushed "demo"');
 $('whRefresh').onclick = whTry(() => postJson('/api/refresh'), 'The panel refreshes');
 $('whReload').onclick = whTry(() => postJson('/api/refresh?reload=1'), 'The panel reloads');
