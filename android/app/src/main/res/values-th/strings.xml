@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Thai strings for the native Android shell (the WebView panel has its own dictionary). -->
+    <string name="pair_title">จับคู่กับคอมพิวเตอร์เครื่องนี้หรือไม่?</string>
+    <string name="pair_message">\"%1$s\" ที่ %2$s (พอร์ต %3$d)\n\nตรวจสอบว่าหน้าต่างจับคู่บนคอมพิวเตอร์แสดงรหัส %4$s\n\nดำเนินการต่อเมื่อคุณเป็นผู้เริ่มการจับคู่บนคอมพิวเตอร์เครื่องนั้นเองเท่านั้น</string>
+    <string name="pair_positive">จับคู่</string>
+    <string name="pair_negative">ยกเลิก</string>
+    <string name="pair_progress">กำลังจับคู่กับ %1$s…</string>
+    <string name="pair_done">จับคู่กับ %1$s แล้ว</string>
+    <string name="pair_failed_title">จับคู่ไม่สำเร็จ</string>
+    <!-- %1$s คือชื่อคอมพิวเตอร์ และ %2$s คือที่อยู่ของเครื่องนั้น -->
+    <string name="pair_failed_unreachable">เชื่อมต่อกับ %1$s ที่ %2$s ไม่ได้ โทรศัพท์และคอมพิวเตอร์ต้องอยู่ในเครือข่ายเดียวกัน (หรือใช้ Tailscale ร่วมกัน) และไฟร์วอลล์บนคอมพิวเตอร์ต้องอนุญาตให้ PhoneBox ผ่านได้</string>
+    <string name="pair_failed_code">%1$s ไม่ยอมรับรหัสนี้: รหัสใช้ได้ครั้งเดียวและมีอายุ 5 นาที ให้เริ่มจับคู่ใหม่บนคอมพิวเตอร์</string>
+    <string name="pair_failed_answer">%1$s ตอบกลับด้วยรหัส %2$d</string>
+    <string name="pair_failed_certificate">คอมพิวเตอร์เครื่องนี้มีใบรับรองไม่ตรงกับคิวอาร์โค้ด ให้เริ่มจับคู่ใหม่</string>
+    <string name="ok">ตกลง</string>
+</resources>

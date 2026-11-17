@@ -14,6 +14,7 @@
   <a href="README.pl.md">Polski</a> ·
   <b>Русский</b> ·
   <a href="README.vi.md">Tiếng Việt</a> ·
+  <a href="README.th.md">ไทย</a> ·
   <a href="README.zh.md">中文 (简体)</a>
 </p>
 

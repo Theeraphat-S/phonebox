@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PhoneBox Settings</title>
 <link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="../panel/thai.css">
 <style>
 :root {
   --bg: #f4f5f7; --panel: #ffffff; --panel-2: #f8f9fb; --line: #e3e6eb; --text: #14171c; --muted: #6b7280;
@@ -17,8 +18,9 @@
     --accent: #2dd4bf; --accent-ink: #062b26; --shadow: none; color-scheme: dark; }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "PhoneBox Thai", "Segoe UI", system-ui, sans-serif; }
 button, input, select, textarea { font: inherit; color: inherit; }
+:lang(th) body { line-height: 1.6; }
 header {
   position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 14px;
   padding: 12px 24px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px);

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+**Panel and settings**
+- Thai (ไทย): the panel, the settings page, the widget and template catalog and the phone's pairing dialog are
+  translated, and a Thai README joins the others. Noto Sans Thai (SIL OFL) is bundled, so Thai text looks the same on
+  every phone and works offline; Thai text is never letter-spaced, which would pull tone marks off their letters.
+
 ## 0.9.17 — 2026-11-17
 
 Shortcut keys with real icons, the settings page and widget catalog in Vietnamese, and a few panel fixes.
