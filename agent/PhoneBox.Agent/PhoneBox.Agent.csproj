@@ -63,6 +63,7 @@
     <!-- the phone's panel, served at /panel/ for the live preview in the layout editor -->
     <EmbeddedResource Include="..\..\android\app\src\main\assets\www\*.*" LogicalName="www/%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\..\android\app\src\main\assets\www\widgets\*.*" LogicalName="www/widgets/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\..\android\app\src\main\assets\www\fonts\*.*" LogicalName="www/fonts/%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

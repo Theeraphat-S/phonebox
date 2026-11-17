@@ -323,13 +323,14 @@ app.MapGet("/panel/{*file}", (string? file, HttpRequest req) =>
 {
     if (string.IsNullOrEmpty(file) && !req.Path.Value!.EndsWith('/')) return Results.Redirect("/panel/" + req.QueryString);
     file = string.IsNullOrEmpty(file) ? "index.html" : file;
-    // index.html, main.js, style.css… and the widget modules in widgets/
-    if (!System.Text.RegularExpressions.Regex.IsMatch(file, @"^(widgets/)?[A-Za-z0-9_.-]+$") || file.Contains("..")) return Results.NotFound();
+    // index.html, main.js, style.css… the widget modules in widgets/ and the bundled font in fonts/
+    if (!System.Text.RegularExpressions.Regex.IsMatch(file, @"^(widgets/|fonts/)?[A-Za-z0-9_.-]+$") || file.Contains("..")) return Results.NotFound();
     var type = Path.GetExtension(file) switch
     {
         ".html" => "text/html; charset=utf-8",
         ".js" => "text/javascript; charset=utf-8",
         ".css" => "text/css; charset=utf-8",
+        ".woff2" => "font/woff2",
         _ => "application/octet-stream",
     };
     return AppPaths.Resource("www/" + file) is { } s ? Results.Stream(s, type) : Results.NotFound();

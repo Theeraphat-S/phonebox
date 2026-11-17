@@ -400,6 +400,7 @@ public class ConfigConcurrencyTests
     [InlineData("\"TR\"", "tr")]       // any case
     [InlineData("\" de \"", "de")]     // stray spaces
     [InlineData("\"vi\"", "vi")]       // added after the list was first written (#177)
+    [InlineData("\"th\"", "th")]
     [InlineData("\"xx\"", "auto")]     // a language PhoneBox does not have
     [InlineData("null", "auto")]
     [InlineData("\"\"", "auto")]
@@ -419,6 +420,18 @@ public class ConfigConcurrencyTests
     {
         using var s = AppPaths.Resource("www/i18n.js");
         Assert.NotNull(s);
+    }
+
+    [Theory]
+    [InlineData("www/thai.css")]
+    [InlineData("www/fonts/NotoSansThai-wght.woff2")]
+    [InlineData("www/fonts/OFL.txt")]
+    public void TheThaiFontAndItsLicenceAreEmbedded(string name)
+    {
+        // the settings page and the live preview serve them at /panel/; the font is what draws Thai text
+        using var s = AppPaths.Resource(name);
+        Assert.NotNull(s);
+        Assert.True(s!.Length > 0);
     }
 
     [Fact]
