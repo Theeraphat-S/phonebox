@@ -14,11 +14,11 @@
     lo + (hi - lo) * (0.5 + 0.5 * Math.sin((2 * Math.PI * (now() - START)) / 1000 / period + phase)) + rnd(-noise, noise);
 
   const SHORTCUTS = [
-    ['terminal', 'Terminal', '⌨️', '#4b5563'], ['code', 'VS Code', '📝', '#2f80ed'], ['browser', 'Browser', '🌐', '#0ea5e9'],
-    ['files', 'Files', '📁', '#e5b84b'], ['music', 'Spotify', '🎧', '#1db954'], ['chat', 'Discord', '💬', '#6366f1'],
-    ['snip', 'Snip', '✂️', '#14b8a6'], ['taskmgr', 'Task Manager', '📊', '#22c55e'], ['mute', 'Mute', '🔇', '#f59e0b'],
-    ['screenoff', 'Screen Off', '🌙', '#8b5cf6'], ['lock', 'Lock', '🔒', '#ef4444'], ['settings', 'Settings', '⚙️', '#94a3b8'],
-  ].map(([id, label, icon, color]) => ({ id, label, icon, color, cmd: id === 'mute' ? 'builtin:mute' : 'demo', args: null, toggle: false }));
+    ['terminal', 'Terminal', 'terminal', '#4b5563'], ['code', 'VS Code', 'code', '#2f80ed'], ['browser', 'Browser', 'globe', '#0ea5e9'],
+    ['files', 'Files', 'folder', '#e5b84b'], ['music', 'Spotify', 'headphones', '#1db954'], ['chat', 'Discord', 'message-circle', '#6366f1'],
+    ['snip', 'Snip', 'scissors', '#14b8a6'], ['taskmgr', 'Task Manager', 'column-chart', '#22c55e'], ['mute', 'Mute', 'volume-off', '#f59e0b'],
+    ['screenoff', 'Screen Off', 'moon', '#8b5cf6'], ['lock', 'Lock', 'lock', '#ef4444'], ['settings', 'Settings', 'settings', '#94a3b8'],
+  ].map(([id, label, icon, color]) => ({ id, label, icon: 'icon:' + icon, color, cmd: id === 'mute' ? 'builtin:mute' : 'demo', args: null, toggle: false }));
   const PAGES = ['home', 'dashboard', 'ai', 'work', 'system', 'procs', 'deck', 'music', 'status', 'ambient', 'world', 'daily', 'markets', 'feeds', 'focus', 'calm', 'clock', 'automation', 'planner', 'nightstand', 'weekend', 'focuswork',
     'codexbar', 'devops', 'audio-deck', 'stream-deck', 'meeting-deck', 'development-deck', 'music-deck', 'system-deck'];
 

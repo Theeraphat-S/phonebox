@@ -538,6 +538,7 @@ public sealed partial class ConfigStore(string path)
                 for (var i = 2; staleIds?.Contains(unique) == true || !used.Add(unique); i++) unique = $"{id}-{i}";
                 s.Id = unique;
             }
+            s.Icon = IconText.UpgradeDefault(s.Id, s.Icon);
             if (string.IsNullOrWhiteSpace(s.Args)) s.Args = null;
             if (string.IsNullOrWhiteSpace(s.Cwd)) s.Cwd = null;
             s.Steps = s.Steps?.Where(x => x is not null).Select(x => x.Trim()).Where(x => x.Length > 0).Take(50).ToList();
