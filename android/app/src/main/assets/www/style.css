@@ -36,7 +36,7 @@ html, body {
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
-  font-family: Roboto, "Segoe UI", system-ui, sans-serif;
+  font-family: "PhoneBox Thai", Roboto, "Segoe UI", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   -webkit-user-select: none;
   user-select: none;
