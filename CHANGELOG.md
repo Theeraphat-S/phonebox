@@ -3,6 +3,10 @@
 ## Unreleased
 
 **Panel and settings**
+- Emoji in the interface are replaced by IconMCP icons, drawn as inline SVG: they follow the text colour, look the
+  same on every device and work offline. Widgets, page tabs, shortcut keys, rule presets and the catalog use them.
+  An emoji or a few letters you typed yourself still works as an icon; the settings page has a new icon picker that
+  saves a built-in icon.
 - Thai (ไทย): the panel, the settings page, the widget and template catalog and the phone's pairing dialog are
   translated, and a Thai README joins the others. Noto Sans Thai (SIL OFL) is bundled, so Thai text looks the same on
   every phone and works offline; Thai text is never letter-spaced, which would pull tone marks off their letters.

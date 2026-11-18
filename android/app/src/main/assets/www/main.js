@@ -42,7 +42,7 @@ export const PREVIEW = new URLSearchParams(location.search).has('preview') && wi
 
 /** Used until the agent has sent its settings once (first start without a connection). */
 export const FALLBACK_PAGES = [{
-  id: 'home', title: 'Home', icon: '🏠', enabled: true, widgets: [
+  id: 'home', title: 'Home', icon: 'icon:home', enabled: true, widgets: [
     { id: 'clock', type: 'clock', x: 0, y: 0, w: 6, h: 4, options: {} },
     { id: 'media', type: 'media', x: 6, y: 0, w: 6, h: 4, options: {} },
     { id: 'cpu', type: 'stat', x: 0, y: 4, w: 3, h: 2, options: { metric: 'cpu' } },
@@ -152,32 +152,18 @@ export function h(tag, cls, ...kids) {
   return e;
 }
 
-/* Interface icons: Lucide (https://lucide.dev), ISC license — a small inline set keeps the
-   panel's chrome consistent across platforms and works fully offline. Icons are decorative
-   (aria-hidden); the controls they sit in carry the accessible names.
-   Lucide licence (ISC): Copyright (c) for portions of Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT).
-   All other copyright (c) for Lucide are held by Lucide Contributors 2022.
-   Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby
-   granted, provided that the above copyright notice and this permission notice appear in all copies. */
-const ICONS = {
-  x: 'M18 6 6 18M6 6l12 12',
-  hourglass: 'M5 22h14M5 2h14M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2',
-  wifiOff: 'M8.5 16.5a5 5 0 0 1 7 0M2 8.82a15 15 0 0 1 4.17-2.65M10.66 5c4.01-.36 8.14.9 11.34 3.76M16.85 11.25a10 10 0 0 1 2.22 1.68M5 13a10 10 0 0 1 5.24-2.76M12 20h.01M2 2l20 20',
-  warn: 'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01',
-  check: 'M20 6 9 17l-5-5',
-  err: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 8v4M12 16h.01',
-  info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
-  pause: 'M6 4h4v16H6zM14 4h4v16h-4z',
-  play: 'M6 3l14 9-14 9V3z',
-  mic: 'M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8',
-};
-export function icon(name, cls = '') {
-  const t = document.createElement('template');
-  t.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${ICONS[name] || ''}"/></svg>`;
-  const s = t.content.firstElementChild;
-  s.setAttribute('class', 'ico' + (cls ? ' ' + cls : ''));
-  return s;
-}
+/* Interface icons: Lucide inline SVG from icons.js (a classic script loaded before this module, with the licence
+   notice). Icons are decorative (aria-hidden); the controls they sit in carry the accessible names.
+   icon('wifi-off') is an <svg>; iconOf(value) is the node for any stored icon value — an icon name, "icon:name",
+   or plain text such as an emoji — so user-chosen emoji keep working next to the built-in icons. `tone` tints a status icon
+   (see .ico.t-* in style.css) while the rest follow the text colour. */
+const PB = window.PBIcons;
+export function icon(name, cls = '') { return PB.el(name, cls); }
+export const iconOf = (value, cls = '') => PB.node(value, cls);
+export const iconHtml = (value, cls = '') => PB.html(value, cls);
+export const iconName = (value) => PB.nameOf(value);
+// The text form of a stored icon, for plain-text spots (a notification, a title attribute): an emoji stays, an icon name has no text.
+export const iconText = (value) => (PB.nameOf(value) ? '' : value || '');
 
 export const pad = (n) => String(n).padStart(2, '0');
 // Clock times follow display.hour12: false ("14:05", default), true ("2:05 PM") or "auto" (follow the phone). Pass hours 0-23.
@@ -225,7 +211,7 @@ export const color = (c) => (c && c.startsWith('--') ? cssVar(c) : c);
 export let toastTimer = 0;
 export function toast(msg, kind = '', title = '', seconds = 2.6) {
   const t = $('toast');
-  const ic = { ok: 'check', err: 'err', warn: 'warn' }[kind] || 'info';
+  const ic = { ok: 'check', err: 'alert-circle', warn: 'warning-triangle' }[kind] || 'info';
   const msgSpan = h('span', null, icon(ic, 'm'), msg);
   t.replaceChildren(...(title ? [h('b', null, title), msgSpan] : [msgSpan]));
   t.className = 'toast on ' + kind;
@@ -379,15 +365,22 @@ export function metricText(m, s) {
 // The condition names are i18n keys: they are translated when the line is drawn, not when this table is built, so a
 // language change applies without reloading the panel.
 export const WX = {
-  0: ['wx.clear', '☀️', '🌙'], 1: ['wx.mostlyClear', '🌤️', '🌙'], 2: ['wx.partlyCloudy', '⛅', '☁️'], 3: ['wx.overcast', '☁️', '☁️'],
-  45: ['wx.fog', '🌫️'], 48: ['wx.rimeFog', '🌫️'],
-  51: ['wx.lightDrizzle', '🌦️'], 53: ['wx.drizzle', '🌦️'], 55: ['wx.heavyDrizzle', '🌧️'], 56: ['wx.freezingDrizzle', '🌧️'], 57: ['wx.freezingDrizzle', '🌧️'],
-  61: ['wx.lightRain', '🌦️'], 63: ['wx.rain', '🌧️'], 65: ['wx.heavyRain', '🌧️'], 66: ['wx.freezingRain', '🌧️'], 67: ['wx.freezingRain', '🌧️'],
-  71: ['wx.lightSnow', '🌨️'], 73: ['wx.snow', '🌨️'], 75: ['wx.heavySnow', '❄️'], 77: ['wx.snowGrains', '🌨️'],
-  80: ['wx.lightShowers', '🌦️'], 81: ['wx.showers', '🌧️'], 82: ['wx.heavyShowers', '⛈️'], 85: ['wx.snowShowers', '🌨️'], 86: ['wx.heavySnowShowers', '❄️'],
-  95: ['wx.thunderstorm', '⛈️'], 96: ['wx.thunderstormHail', '⛈️'], 99: ['wx.severeHail', '⛈️'],
+  0: ['wx.clear', 'sun', 'moon'], 1: ['wx.mostlyClear', 'cloud-sun', 'cloud-moon'], 2: ['wx.partlyCloudy', 'cloud-sun', 'cloud-moon'], 3: ['wx.overcast', 'cloud', 'cloud'],
+  45: ['wx.fog', 'cloud-fog'], 48: ['wx.rimeFog', 'cloud-fog'],
+  51: ['wx.lightDrizzle', 'cloud-sun-rain'], 53: ['wx.drizzle', 'cloud-sun-rain'], 55: ['wx.heavyDrizzle', 'cloud-rain'], 56: ['wx.freezingDrizzle', 'cloud-rain'], 57: ['wx.freezingDrizzle', 'cloud-rain'],
+  61: ['wx.lightRain', 'cloud-sun-rain'], 63: ['wx.rain', 'cloud-rain'], 65: ['wx.heavyRain', 'cloud-rain'], 66: ['wx.freezingRain', 'cloud-rain'], 67: ['wx.freezingRain', 'cloud-rain'],
+  71: ['wx.lightSnow', 'cloud-snow'], 73: ['wx.snow', 'cloud-snow'], 75: ['wx.heavySnow', 'snowflake'], 77: ['wx.snowGrains', 'cloud-snow'],
+  80: ['wx.lightShowers', 'cloud-sun-rain'], 81: ['wx.showers', 'cloud-rain'], 82: ['wx.heavyShowers', 'cloud-lightning'], 85: ['wx.snowShowers', 'cloud-snow'], 86: ['wx.heavySnowShowers', 'snowflake'],
+  95: ['wx.thunderstorm', 'cloud-lightning'], 96: ['wx.thunderstormHail', 'cloud-lightning'], 99: ['wx.severeHail', 'cloud-lightning'],
 };
-export const wxIcon = (code, day = 1) => { const x = WX[code] || [null, '🌡️']; return day === 0 && x[2] ? x[2] : x[1]; };
+const WX_TONE = { sun: 'sun', 'cloud-sun': 'sun', moon: 'night', 'cloud-moon': 'night', cloud: 'cloud', 'cloud-fog': 'cloud', 'cloud-sun-rain': 'rain',
+  'cloud-rain': 'rain', 'cloud-snow': 'snow', snowflake: 'snow', 'cloud-lightning': 'storm', thermometer: 'warm' };
+/** The weather icon for a WMO code as an <svg>, tinted by kind (sun yellow, rain blue, …); day = 0 picks the night variant. */
+export const wxIcon = (code, day = 1) => {
+  const x = WX[code] || [null, 'thermometer'];
+  const name = day === 0 && x[2] ? x[2] : x[1];
+  return icon(name, 't-' + WX_TONE[name]);
+};
 /** The condition in the panel's language, or an em dash for a code Open-Meteo does not list. */
 export const wxText = (code) => { const x = WX[code]; return x ? t(x[0]) : '—'; };
 
@@ -451,13 +444,13 @@ export function wxBlock() {
     const l = wxLines();
     if (!l) {
       // no forecast: clear the last one too, so an old temperature never sits next to the new message
-      e.querySelector('.wx-icon').textContent = '·';
+      e.querySelector('.wx-icon').replaceChildren('·');
       e.querySelector('.wx-temp').textContent = '--°';
       e.querySelector('.wx-range').textContent = '';
       e.querySelector('.wx-desc').textContent = D.weather === null ? t('w.loading') : t('w.weatherUnavailable');
       return;
     }
-    e.querySelector('.wx-icon').textContent = l.icon;
+    e.querySelector('.wx-icon').replaceChildren(l.icon);
     e.querySelector('.wx-temp').textContent = l.temp;
     e.querySelector('.wx-desc').textContent = l.desc;
     e.querySelector('.wx-range').textContent = l.range;
@@ -468,7 +461,7 @@ export function wxBlock() {
 // ---------------------------------------------------------------- status line (clock widget)
 export function phoneBattery() {
   if (!bridge) return '';
-  try { const b = JSON.parse(bridge.battery()); return `📱 ${b.level}%${b.plugged ? ' ⚡' : ''}`; } catch (_) { return ''; }
+  try { const b = JSON.parse(bridge.battery()); return h('span', null, icon('smartphone', 'm'), `${b.level}%`, b.plugged ? icon('bolt', 'm t-warm') : null); } catch (_) { return ''; }
 }
 
 export function quotaProviders() { return D.quotas?.providers || []; }
@@ -478,7 +471,7 @@ export function renderStatus(el) {
   const name = online ? (D.state?.host || 'PC') + (via === 'wifi' ? ' · ' + t('status.wiFi') : via === 'usb' ? ' · ' + t('status.usb') : '') : online === false ? t('panel.pcNotConnected') : t('panel.connecting');
   const kids = [h('span', 'dot ' + (online ? 'on' : online === false ? 'off' : '')), h('span', null, name)];
   const bat = phoneBattery();
-  if (bat) kids.push(h('span', 'sep', '·'), h('span', null, bat));
+  if (bat) kids.push(h('span', 'sep', '·'), bat);
   for (const p of quotaProviders()) {
     const l = p.limits?.[0];
     if (!l) continue;
@@ -489,7 +482,7 @@ export function renderStatus(el) {
   const waiting = (D.work?.sessions || []).filter((s) => s.status === 'waiting').length;
   if (waiting) kids.push(h('span', 'sep', '·'), h('span', 'smini', t('status.waitingCount', { n: waiting })));
   const u = D.state?.update;
-  if (u) kids.push(h('span', 'sep', '·'), h('span', 'upd', u.app && via !== 'usb' ? t('status.updateUsb', { version: u.latest }) : t('status.updateAvailable', { version: u.latest })));
+  if (u) kids.push(h('span', 'sep', '·'), h('span', 'upd', icon('arrow-up', 'm'), u.app && via !== 'usb' ? t('status.updateUsb', { version: u.latest }) : t('status.updateAvailable', { version: u.latest })));
   el.replaceChildren(...kids);
   // Too long for the widget: drop the quota summaries, the most dispensable part.
   while (el.scrollWidth > el.clientWidth + 1 && el.querySelector('.qm')) [...el.querySelectorAll('.qm')].pop().remove();
@@ -508,7 +501,7 @@ export async function runShortcut(btn, id) {
 }
 
 export function keyButton(s) {
-  const icon = h('span', 'k-icon', s.icon || '•');
+  const icon = h('span', 'k-icon', iconOf(s.icon || '•'));
   const b = h('button', 'key' + (s.toggle ? ' toggle' : ''), icon, h('span', 'k-label', s.label));
   b.style.setProperty('--k', s.color || '#6b7280');
   b.dataset.id = s.id;
@@ -974,10 +967,12 @@ export function handleEvent(e) {
   else if (e.kind === 'reload') location.reload();
 }
 
-export const WIDGET_ICONS = { dictate: '🎙️', spectrum: '📶', 'app-console': '🎛️',discord: '💬', rules: '⚡', chargecare: '🔋', nextup: '⏭️', moon: '🌙', wordclock: '🔤', clock: '🕒', weather: '⛅', forecast: '🌦️', media: '🎵', stat: '📈', gauge: '⏲️', chart: '📊', meters: '💾', gpu: '🎮', quotas: '✳️', sessions: '🤖',
-  github: '🐙', processes: '⚙️', shortcuts: '🎛️', button: '🔘', worldclock: '🌍', calendar: '📅', pomodoro: '🍅', countdown: '⏳', note: '📝', command: '💻',
-  push: '📡', inbox: '📬', label: '🔤', analog: '🕰️', progress: '📆', stopwatch: '⏱️', timer: '⏲️', counter: '🔢', breathe: '🫁', quote: '💬',
-  checklist: '✅', battery: '🔋', topprocs: '🔥', quotaring: '🎯', volume: '🔊', sun: '🌅', air: '🍃', hackernews: '📰', feeds: '🗞️', photos: '🖼️', exchange: '💱', crypto: '🪙', image: '🖼️', pcswitch: '🖥️' };
+export const WIDGET_ICONS = { dictate: 'mic', spectrum: 'signal', 'app-console': 'slider-horizontal', discord: 'message-circle', rules: 'bolt', chargecare: 'battery-charging', nextup: 'skip-forward',
+  moon: 'moon', wordclock: 'type', clock: 'clock', weather: 'cloud-sun', forecast: 'cloud-sun-rain', media: 'music', stat: 'trending-up', gauge: 'gauge', chart: 'column-chart',
+  meters: 'hard-drive', gpu: 'gamepad', quotas: 'asterisk', sessions: 'bot',
+  github: 'git-branch', processes: 'cpu', shortcuts: 'grid', button: 'radio-button', worldclock: 'globe', calendar: 'calendar', pomodoro: 'timer', countdown: 'hourglass', note: 'note', command: 'terminal',
+  push: 'radio', inbox: 'inbox', label: 'type', analog: 'clock', progress: 'calendar-range', stopwatch: 'timer', timer: 'timer', counter: 'hash', breathe: 'wind', quote: 'quote',
+  checklist: 'list-checks', battery: 'battery-full', topprocs: 'flame', quotaring: 'target', volume: 'volume-max', sun: 'sunrise', air: 'leaf', hackernews: 'newspaper', feeds: 'rss', photos: 'images', exchange: 'arrow-left-right', crypto: 'coins', image: 'image', pcswitch: 'monitor' };
 
 // ================================================================= pages
 export const pager = $('pager');
@@ -1248,7 +1243,7 @@ let navTimer = 0;
 let lastAutoSwitch = 0;
 let lastNav = 0;              // last automatic switch (for the idle timer)
 const dsp = () => cfg.display || {};
-const pageLabel = (i) => { const p = pages[i]; return p ? `${p.icon || ''} ${p.title}`.trim() : ''; };
+const pageLabel = (i) => { const p = pages[i]; return p ? `${iconText(p.icon)} ${p.title}`.trim() : ''; };
 
 export function requestPage(d) {
   if (PREVIEW) return;
@@ -1449,7 +1444,7 @@ export function flashTitle() {
   const p = pages[curPage];
   if (!p || pages.length < 2) return;
   const t = $('ptitle');
-  t.textContent = `${p.icon || ''} ${p.title}`.trim();
+  t.replaceChildren(...(p.icon ? [iconOf(p.icon, 'm')] : []), p.title);
   t.classList.add('on');
   clearTimeout(titleTimer);
   titleTimer = setTimeout(() => t.classList.remove('on'), 900);
@@ -1474,11 +1469,11 @@ export function openOverview() {
   const ov = $('overview');
   const tile = (p, i) => {
     const map = h('div', 'ov-map', p.widgets.map((w) => {
-      const b = h('span', null, WIDGET_ICONS[w.type] || '▫️');
+      const b = h('span', null, iconOf(WIDGET_ICONS[w.type] || 'grid'));
       b.style.gridArea = `${w.y + 1} / ${w.x + 1} / span ${w.h} / span ${w.w}`;
       return b;
     }));
-    const t = h('button', 'ov-tile' + (i === curPage ? ' on' : ''), map, h('div', 'ov-name', h('b', null, `${i + 1}`), ` ${p.icon || ''} ${p.title}`));
+    const t = h('button', 'ov-tile' + (i === curPage ? ' on' : ''), map, h('div', 'ov-name', h('b', null, `${i + 1}`), ' ', ...(p.icon ? [iconOf(p.icon, 'm')] : []), p.title));
     t.addEventListener('click', (e) => { e.stopPropagation(); haptic(); closeOverview(); goPage(i, true); });
     return t;
   };
@@ -1487,7 +1482,7 @@ export function openOverview() {
   // several paired computers: switch between them here (a USB cable always wins)
   const pcs = pairedPcs();
   $('ovPcs').replaceChildren(...(pcs.length > 1 ? pcs.map((pc) => {
-    const b = h('button', 'ov-pc' + (pc.active ? ' on' : ''), '🖥️ ' + (pc.name || t('panel.computer')));
+    const b = h('button', 'ov-pc' + (pc.active ? ' on' : ''), icon('monitor', 'm'), pc.name || t('panel.computer'));
     b.addEventListener('click', (e) => { e.stopPropagation(); switchPc(pc); });
     return b;
   }) : []));

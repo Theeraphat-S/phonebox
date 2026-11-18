@@ -181,8 +181,15 @@ body.night #pagePauseOverlay { display: none; }
   font-size: 11.5px; padding: 3px 10px; border-radius: 99px; background: rgba(239, 68, 68, .18); color: #fca5a5;
 }
 body.offline #offline { display: flex; align-items: center; gap: 5px; }
-.ico { width: 1em; height: 1em; vertical-align: -0.15em; flex: none; }
+.ico { width: 1em; height: 1em; vertical-align: -0.15em; flex: none; stroke-width: var(--ico-stroke, 1.5px); }
+/* IconMCP draws on a 16-unit grid; a non-scaling stroke keeps the line the same width (--ico-stroke) at every icon size. */
+.ico :is(path, line, circle, rect, ellipse) { vector-effect: non-scaling-stroke; }
 .ico.m { margin-right: .35em; }
+/* Status tint for icons that carry meaning (weather, low battery, muted mic, live): everything else stays currentColor. */
+.ico.t-sun { color: #facc15; } .ico.t-cloud { color: #cbd5e1; } .ico.t-rain { color: #60a5fa; } .ico.t-snow { color: #bae6fd; }
+.ico.t-storm { color: #a78bfa; } .ico.t-night { color: #c4b5fd; } .ico.t-warm { color: #fb923c; }
+.ico.t-good { color: #34d399; } .ico.t-bad { color: #f87171; } .ico.t-live { color: #ef4444; }
+.ico-t { display: inline-block; }
 
 /* ---------- calm page switching ---------- */
 #navCard {
@@ -1186,7 +1193,7 @@ body.waking::after { opacity: 0; pointer-events: auto; transition: opacity .2s e
 /* dictation: a big microphone button, what was heard, and a status line */
 .w.dc { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; }
 .dc-mic { width: 84px; height: 84px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .07); color: var(--text); display: flex; align-items: center; justify-content: center; flex: none; }
-.dc-mic .ico { width: 38px; height: 38px; }
+.dc-mic .ico { width: 38px; height: 38px; --ico-stroke: 2px; }
 .dc-mic.on { background: var(--err, #ef4444); border-color: transparent; color: #fff; animation: dc-pulse 1.4s ease-in-out infinite; }
 @keyframes dc-pulse { 50% { opacity: .7; } }
 .dc-text { margin-top: 10px; font-size: 16px; max-width: 100%; max-height: 4.2em; overflow-y: auto; touch-action: pan-y; word-break: break-word; }
