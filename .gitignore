@@ -50,3 +50,5 @@ tools/ui-tests/test-results/
 
 *.log
 *.txt
+# the bundled font licences are shipped files, not logs
+!android/app/src/main/assets/www/fonts/*.txt
