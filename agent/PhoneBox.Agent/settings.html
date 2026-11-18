@@ -21,6 +21,13 @@
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "PhoneBox Thai", "Segoe UI", system-ui, sans-serif; }
 button, input, select, textarea { font: inherit; color: inherit; }
 :lang(th) body { line-height: 1.6; }
+/* Thai glyphs are smaller than Latin ones at the same px size and carry stacked marks, so the 11-12.5px UI text is
+   raised a step (the numbers and code next to it keep their size). */
+:lang(th) :is(.field label, .btn.sm, .seg button) { font-size: 13.5px; }
+:lang(th) :is(.field .hint, .pill, .pal small, .tpl small, .rule .live, .rule .day, .icon-details summary, .key .kl) { font-size: 13px; }
+:lang(th) :is(.wb b) { font-size: 13px; }
+:lang(th) :is(.wb small, .pal-cat, .pt-n) { font-size: 12px; }
+:lang(th) .pal b { font-size: 14px; }
 header {
   position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 14px;
   padding: 12px 24px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px);
@@ -65,6 +72,9 @@ input[type=text], input[type=number], input[type=time], select, textarea {
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; outline: none; min-width: 0;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+/* keyboard focus: a visible ring on everything that can be tabbed to (the mouse never draws it) */
+:is(input, select, textarea):focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); }
+:is(button, a, summary, [tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
 .check { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; user-select: none; margin-right: 14px; }
 .check input { accent-color: var(--accent); width: 16px; height: 16px; }
@@ -144,7 +154,14 @@ textarea { width: 100%; resize: vertical; }
 table.items { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.items td { border-top: 1px solid var(--line); padding: 6px 8px; vertical-align: middle; }
 table.items td.val { font-family: Consolas, monospace; font-size: 12px; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 1100px) { .pages-layout, .ed-cols { grid-template-columns: 1fr; } #pageTabs { position: static; } }
+@media (max-width: 1100px) {
+  .pages-layout, .ed-cols { grid-template-columns: 1fr; }
+  /* one column: the page list becomes a scrolling strip, so the editor of the picked page stays in view instead of
+     sitting below a list of 20+ pages */
+  #pageTabs { position: static; flex-direction: row; align-items: center; overflow-x: auto; padding: 2px 2px 8px; scrollbar-width: thin; }
+  #pageTabs .ptab { flex: none; max-width: 220px; }
+  #pageTabs > .btn, #pageTabs > .row { flex: none; width: auto !important; margin-top: 0 !important; }
+}
 
 /* rules */
 .rule { display: grid; gap: 10px; }
@@ -198,7 +215,8 @@ table.items td.val { font-family: Consolas, monospace; font-size: 12px; max-widt
 .icon-details { margin-top: 6px; } .icon-details summary { cursor: pointer; font-size: 12px; color: var(--muted); }
 .emojis button:hover { background: var(--panel-2); }
 input[type=color] { width: 42px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-2); padding: 2px; }
-.icon-input { width: 70px; text-align: center; font-size: 20px; }
+/* holds an icon name (icon:home) or an emoji; the preview next to it shows the result at full size */
+.icon-input { width: 120px; font: 13px/1.4 ui-monospace, Consolas, monospace; color: var(--muted); }
 .custom-icon-preview { width: 30px; height: 30px; object-fit: contain; border-radius: 6px; background: var(--panel-2); }
 
 /* smart stack builder in inspector */
@@ -391,7 +409,7 @@ dd { margin: 0; word-break: break-all; }
         <div class="presets" id="rulePresets"></div>
       </div>
       <div class="card row" style="gap:10px;align-items:center">
-        <span id="rulesPausedState" class="hint" style="flex:1">Page switches count down on the phone and wait while you use it (General › Page switching).</span>
+        <span id="rulesPausedState" class="hint" style="flex:1" data-i18n="s.g.rulesIdle">Page switches count down on the phone and wait while you use it (General › Page switching).</span>
         <button class="btn sm" id="rulesPauseBtn" data-i18n="s.rules.pause1h">Pause all rules for 1 hour</button>
       </div>
       <div id="ruleList"></div>
@@ -417,7 +435,7 @@ dd { margin: 0; word-break: break-all; }
             <div class="field" style="flex:1"><label data-i18n="s.weather.lon">Longitude</label><input type="number" step="0.001" data-bind="weather.lon" data-type="num"></div>
           </div>
         </div>
-        <p class="hint" style="margin:8px 0 0">The phone asks Open-Meteo for this location only while a page has a widget that uses the weather (weather, forecast, sun &amp; moon, a clock with its weather line, Custom HTML).</p>
+        <p class="hint" style="margin:8px 0 0" data-i18n-html="s.g.weatherHint">The phone asks Open-Meteo for this location only while a page has a widget that uses the weather (weather, forecast, sun &amp; moon, a clock with its weather line, Custom HTML).</p>
       </div>
 
       <div class="card">
@@ -431,7 +449,7 @@ dd { margin: 0; word-break: break-all; }
 
       <div class="card">
         <h3 data-i18n="s.calendars.title">Calendars</h3>
-        <p class="hint" style="margin:0 0 12px">For the <b>Agenda</b> widget and calendar rules. Paste an iCalendar (ICS) address:
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.calHint">For the <b>Agenda</b> widget and calendar rules. Paste an iCalendar (ICS) address:
           Google Calendar › Settings › your calendar › <i>Secret address in iCal format</i>; Outlook › Settings › Calendar › Shared calendars ›
           <i>Publish a calendar</i> (ICS link); iCloud › share as a public calendar (<code>webcal://</code> works). The addresses stay on this computer.</p>
         <div id="calList"></div>
@@ -462,7 +480,7 @@ dd { margin: 0; word-break: break-all; }
 
       <div class="card">
         <h3 data-i18n="s.ha.title">Home Assistant</h3>
-        <p class="hint" style="margin:0 0 12px">For the <b>Home Assistant</b> widget. Create a token in Home Assistant › your profile › Security ›
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.haHint">For the <b>Home Assistant</b> widget. Create a token in Home Assistant › your profile › Security ›
           <i>Long-lived access tokens</i>. The token stays on this computer; the phone only sees the entities its widgets list.
           (Home Assistant can also push values and notifications to the panel, see Webhooks.)</p>
         <div class="grid2">
@@ -484,8 +502,8 @@ dd { margin: 0; word-break: break-all; }
 
       <div class="card">
         <h3 data-i18n="s.obs.title">OBS Studio</h3>
-        <div class="row" style="margin-bottom:8px"><label class="switch"><input type="checkbox" data-bind="obs.enabled"><span></span></label> Connect to OBS (for the <b>OBS</b> widget, the On air widget and rules)</div>
-        <p class="hint" style="margin:0 0 12px">In OBS: Tools › WebSocket Server Settings › <i>Enable WebSocket server</i>; copy the password from <i>Show Connect Info</i>.</p>
+        <div class="row" style="margin-bottom:8px"><label class="switch"><input type="checkbox" data-bind="obs.enabled"><span></span></label> <span data-i18n-html="s.g.obsEnable">Connect to OBS (for the <b>OBS</b> widget, the On air widget and rules)</span></div>
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.obsHint">In OBS: Tools › WebSocket Server Settings › <i>Enable WebSocket server</i>; copy the password from <i>Show Connect Info</i>.</p>
         <div class="grid2">
           <div class="field"><label data-i18n="s.ha.address">Address</label><input type="text" data-bind="obs.url" placeholder="ws://127.0.0.1:4455" spellcheck="false"></div>
           <div class="field"><label data-i18n="s.obs.password">Password</label><input type="password" data-bind="obs.password" autocomplete="off"></div>
@@ -517,7 +535,7 @@ dd { margin: 0; word-break: break-all; }
         </div>
         <div class="field" style="max-width:420px"><label data-i18n="s.display.orientation">Orientation</label>
           <select data-bind="display.orientation"><option value="landscape" data-i18n="s.display.orientation.landscape">Landscape</option><option value="portrait" data-i18n="s.display.orientation.portrait">Portrait</option><option value="auto" data-i18n="s.display.orientation.auto">Follow the phone</option></select>
-          <span class="hint">You design pages in landscape; in portrait the panel arranges the widgets by itself, top to bottom. Tablets use the same pages, just bigger.</span></div>
+          <span class="hint" data-i18n="s.g.orientHint">You design pages in landscape; in portrait the panel arranges the widgets by itself, top to bottom. Tablets use the same pages, just bigger.</span></div>
         <div class="field" style="max-width:420px"><label data-i18n="s.display.timeFormat">Time format</label>
           <select data-bind="display.hour12" data-type="hour12"><option value="false" data-i18n="s.display.h24">24-hour (14:05)</option><option value="true" data-i18n="s.display.h12">12-hour (2:05 PM)</option><option value="auto" data-i18n="s.display.orientation.auto">Follow the phone</option></select></div>
         <label class="check"><input type="checkbox" data-bind="display.showSeconds"> <span data-i18n="s.display.showSeconds">Show seconds on the clock</span></label>
@@ -531,73 +549,73 @@ dd { margin: 0; word-break: break-all; }
 
       <div class="card">
         <h3 data-i18n="s.oled.title">OLED burn-in protection</h3>
-        <p class="hint" style="margin:0 0 12px">For OLED screens that show the same page for hours. The AMOLED black theme and the night screen help too.</p>
+        <p class="hint" style="margin:0 0 12px" data-i18n="s.g.oledHint">For OLED screens that show the same page for hours. The AMOLED black theme and the night screen help too.</p>
         <label class="check"><input type="checkbox" data-bind="display.pixelShift"> <span data-i18n="s.oled.pixelShift">Move the panel by a few pixels every 2 minutes, and the night clock around the screen</span></label>
         <div class="field" style="max-width:420px;margin-top:8px"><label data-i18n="s.oled.idleDim">Dim the panel after (minutes without a touch, 0 = never)</label><input type="number" min="0" max="1440" data-bind="display.idleDimMin" data-type="int">
-          <span class="hint">A touch brightens it again without pressing anything; so do a page switch, a notification and a permission prompt.</span></div>
+          <span class="hint" data-i18n="s.g.dimHint">A touch brightens it again without pressing anything; so do a page switch, a notification and a permission prompt.</span></div>
       </div>
 
       <div class="card">
         <h3 data-i18n="s.pageSwitch.title">Page switching</h3>
-        <p class="hint" style="margin:0 0 12px">How rules, webhooks and the idle return change the page. Instead of jumping, the phone shows
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.switchHint">How rules, webhooks and the idle return change the page. Instead of jumping, the phone shows
           <i>“Claude needs me — switching to AI in 3…”</i> with <b>Stay</b> and <b>Go now</b>, then fades over. It never pulls a page away while
           you are using the panel, and rules that fire one after another wait their turn instead of bouncing the screen back and forth.</p>
         <div class="grid2">
           <div class="field"><label data-i18n="s.pageSwitch.homePage">Home page</label><select id="homePageSel" onchange="cfg.display.homePage = this.value || null; changed(); renderPageEditor()"></select>
-            <span class="hint">Where the idle return and the Back key go.</span></div>
-          <div class="field"><label>Back home after (seconds without a touch, 0 = never)</label><input type="number" min="0" max="3600" data-bind="display.idleReturnSec" data-type="int">
-            <span class="hint">Each page can override this (page editor › Back home after).</span></div>
-          <div class="field"><label>Countdown before switching (seconds, 0 = at once)</label><input type="number" min="0" max="30" data-bind="display.switchCountdownSec" data-type="int"></div>
-          <div class="field"><label>Don't interrupt for (seconds after I touch the panel)</label><input type="number" min="0" max="600" data-bind="display.touchGraceSec" data-type="int"></div>
-          <div class="field"><label>At least (seconds between two automatic switches)</label><input type="number" min="0" max="600" data-bind="display.minDwellSec" data-type="int"></div>
-          <div class="field"><label>A rule keeps its page at most (minutes, 0 = while it lasts)</label><input type="number" min="0" max="1440" data-bind="display.holdMaxMin" data-type="int">
-            <span class="hint">After that the panel goes home when nobody touches it.</span></div>
+            <span class="hint" data-i18n="s.g.homeHint">Where the idle return and the Back key go.</span></div>
+          <div class="field"><label data-i18n="s.g.idleReturn">Back home after (seconds without a touch, 0 = never)</label><input type="number" min="0" max="3600" data-bind="display.idleReturnSec" data-type="int">
+            <span class="hint" data-i18n="s.g.idleReturnHint">Each page can override this (page editor › Back home after).</span></div>
+          <div class="field"><label data-i18n="s.g.countdown">Countdown before switching (seconds, 0 = at once)</label><input type="number" min="0" max="30" data-bind="display.switchCountdownSec" data-type="int"></div>
+          <div class="field"><label data-i18n="s.g.touchGrace">Don't interrupt for (seconds after I touch the panel)</label><input type="number" min="0" max="600" data-bind="display.touchGraceSec" data-type="int"></div>
+          <div class="field"><label data-i18n="s.g.minDwell">At least (seconds between two automatic switches)</label><input type="number" min="0" max="600" data-bind="display.minDwellSec" data-type="int"></div>
+          <div class="field"><label data-i18n="s.g.holdMax">A rule keeps its page at most (minutes, 0 = while it lasts)</label><input type="number" min="0" max="1440" data-bind="display.holdMaxMin" data-type="int">
+            <span class="hint" data-i18n="s.g.holdMaxHint">After that the panel goes home when nobody touches it.</span></div>
         </div>
       </div>
 
       <div class="card">
         <h3 data-i18n="s.kiosk.title">Kiosk</h3>
-        <p class="hint" style="margin:0 0 12px">Keep the phone on the panel. Neither needs root.</p>
-        <label class="check"><input type="checkbox" data-bind="display.pin"> Pin the panel: Home and Recents stay on it (Android asks once; hold Back and Overview together to unpin)</label>
-        <label class="check"><input type="checkbox" data-bind="display.homeScreen"> Use the panel as the phone's home screen: it starts after a reboot and Home returns to it (turn off to get your launcher back)</label>
-        <label class="check"><input type="checkbox" data-bind="display.keepAwake"> Keep the phone awake: turn off Android's screen saver (it starts on the charger) and keep the screen on while plugged in (set over USB)</label>
-        <label class="check" id="followComputerLockOption" style="display:none"><input type="checkbox" data-bind="display.followComputerLock"> Follow the computer lock: turn the phone screen off when macOS locks; wake it and open PhoneBox when macOS unlocks (ADB required; unlock phones secured by a PIN or password manually)</label>
+        <p class="hint" style="margin:0 0 12px" data-i18n="s.g.kioskHint">Keep the phone on the panel. Neither needs root.</p>
+        <label class="check"><input type="checkbox" data-bind="display.pin"> <span data-i18n="s.g.pin">Pin the panel: Home and Recents stay on it (Android asks once; hold Back and Overview together to unpin)</span></label>
+        <label class="check"><input type="checkbox" data-bind="display.homeScreen"> <span data-i18n="s.g.homeScreen">Use the panel as the phone's home screen: it starts after a reboot and Home returns to it (turn off to get your launcher back)</span></label>
+        <label class="check"><input type="checkbox" data-bind="display.keepAwake"> <span data-i18n="s.g.keepAwake">Keep the phone awake: turn off Android's screen saver (it starts on the charger) and keep the screen on while plugged in (set over USB)</span></label>
+        <label class="check" id="followComputerLockOption" style="display:none"><input type="checkbox" data-bind="display.followComputerLock"> <span data-i18n="s.g.followLock">Follow the computer lock: turn the phone screen off when macOS locks; wake it and open PhoneBox when macOS unlocks (ADB required; unlock phones secured by a PIN or password manually)</span></label>
       </div>
 
       <div class="card">
         <h3 data-i18n="s.battery.title">Battery care</h3>
-        <p class="hint" style="margin:0 0 12px">A phone that is plugged in all the time wears its battery out. PhoneBox can keep it between two
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.chargeHint">A phone that is plugged in all the time wears its battery out. PhoneBox can keep it between two
           levels by switching the phone's power on and off. Phones cannot stop charging by themselves without root, so the power is switched
           where it comes from: a <b>smart plug in Home Assistant</b> (the phone on its own charger), or two <b>shortcuts</b>, for example
           <code>uhubctl</code> for a USB hub with switchable ports. Without USB power the panel keeps running over Wi-Fi.</p>
-        <div class="row" style="margin-bottom:12px"><label class="switch"><input type="checkbox" data-bind="charge.enabled"><span></span></label> Keep the battery between
-          <input type="number" min="5" max="95" data-bind="charge.min" data-type="int" style="width:70px"> % and
+        <div class="row" style="margin-bottom:12px"><label class="switch"><input type="checkbox" data-bind="charge.enabled"><span></span></label> <span data-i18n="s.g.chargeBetween">Keep the battery between</span>
+          <input type="number" min="5" max="95" data-bind="charge.min" data-type="int" style="width:70px"> <span data-i18n="s.g.chargeAnd">% and</span>
           <input type="number" min="10" max="100" data-bind="charge.max" data-type="int" style="width:70px"> %</div>
         <div class="grid2">
-          <div class="field"><label>Switch the power with</label><select data-bind="charge.method"><option value="ha">a Home Assistant switch (smart plug)</option><option value="shortcuts">two shortcuts (power on / power off)</option></select></div>
-          <div class="field" id="chargeHa"><label>Switch entity</label><input type="text" data-bind="charge.entity" placeholder="switch.phone_charger" spellcheck="false"></div>
-          <div class="field" id="chargeOn" hidden><label>Shortcut: power on</label><select id="chargeOnSel" onchange="cfg.charge.onShortcut = this.value || null; changed()"></select></div>
-          <div class="field" id="chargeOff" hidden><label>Shortcut: power off</label><select id="chargeOffSel" onchange="cfg.charge.offShortcut = this.value || null; changed()"></select></div>
+          <div class="field"><label data-i18n="s.g.chargeWith">Switch the power with</label><select data-bind="charge.method"><option value="ha" data-i18n="s.g.chargeHa">a Home Assistant switch (smart plug)</option><option value="shortcuts" data-i18n="s.g.chargeSc">two shortcuts (power on / power off)</option></select></div>
+          <div class="field" id="chargeHa"><label data-i18n="s.g.chargeEntity">Switch entity</label><input type="text" data-bind="charge.entity" placeholder="switch.phone_charger" spellcheck="false"></div>
+          <div class="field" id="chargeOn" hidden><label data-i18n="s.g.chargeOnSc">Shortcut: power on</label><select id="chargeOnSel" onchange="cfg.charge.onShortcut = this.value || null; changed()"></select></div>
+          <div class="field" id="chargeOff" hidden><label data-i18n="s.g.chargeOffSc">Shortcut: power off</label><select id="chargeOffSel" onchange="cfg.charge.offShortcut = this.value || null; changed()"></select></div>
         </div>
-        <div class="row" style="gap:8px"><button class="btn sm" onclick="chargeTest('off')">Test: power off</button><button class="btn sm" onclick="chargeTest('on')">Test: power on</button>
+        <div class="row" style="gap:8px"><button class="btn sm" onclick="chargeTest('off')" data-i18n="s.g.testOff">Test: power off</button><button class="btn sm" onclick="chargeTest('on')" data-i18n="s.g.testOn">Test: power on</button>
           <span class="hint" id="chargeState"></span></div>
       </div>
 
       <div class="card">
         <h3 data-i18n="s.claude.title">Claude Code permission prompts</h3>
-        <p class="hint" style="margin:0 0 12px">When Claude Code asks for permission (run a command, edit a file…), the phone shows the request with
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.claudeHint">When Claude Code asks for permission (run a command, edit a file…), the phone shows the request with
           <b>Allow</b> and <b>Deny</b>. If the phone is not connected or nobody answers in time, Claude Code asks in the terminal as usual.
           This needs a small hook in <code>~/.claude/settings.json</code>; PhoneBox adds it for you (a backup is kept next to the file).</p>
         <div class="row" style="margin-bottom:12px"><button class="btn" id="hookBtn" data-i18n="s.claude.installHook">Install hook</button><span class="hint" id="hookState"></span></div>
         <div class="row" style="margin-bottom:8px"><label class="switch"><input type="checkbox" data-bind="claude.phoneApprovals"><span></span></label> <span data-i18n="s.claude.askOnPhone">Ask on the phone</span></div>
-        <label class="check"><input type="checkbox" data-bind="claude.onlyWhenAway"> Only when I am away from the PC (no keyboard or mouse for a minute)</label>
-        <div class="field" style="max-width:260px;margin-top:12px"><label>Seconds to answer before the terminal takes over</label><input type="number" min="10" max="3600" data-bind="claude.timeoutSec" data-type="int"></div>
+        <label class="check"><input type="checkbox" data-bind="claude.onlyWhenAway"> <span data-i18n="s.g.onlyAway">Only when I am away from the PC (no keyboard or mouse for a minute)</span></label>
+        <div class="field" style="max-width:260px;margin-top:12px"><label data-i18n="s.g.claudeTimeout">Seconds to answer before the terminal takes over</label><input type="number" min="10" max="3600" data-bind="claude.timeoutSec" data-type="int"></div>
       </div>
 
       <div class="card">
         <h3 data-i18n="s.quotas.title">AI quotas &amp; CodexBar</h3>
-        <p class="hint" style="margin:0 0 12px">Choose which AI coding services to track and show on the panel, and configure rotation.</p>
-        <div class="field"><label>Tracked AI services</label>
+        <p class="hint" style="margin:0 0 12px" data-i18n="s.g.quotaHint">Choose which AI coding services to track and show on the panel, and configure rotation.</p>
+        <div class="field"><label data-i18n="s.g.tracked">Tracked AI services</label>
           <div class="opts">
             <label class="check"><input type="checkbox" id="cb_claude"> Claude</label>
             <label class="check"><input type="checkbox" id="cb_codex"> Codex</label>
@@ -605,48 +623,48 @@ dd { margin: 0; word-break: break-all; }
           </div>
         </div>
         <div class="field" style="margin-top:10px">
-          <label class="check"><input type="checkbox" data-bind="codexBar.rotate"> Rotate providers automatically</label>
+          <label class="check"><input type="checkbox" data-bind="codexBar.rotate"> <span data-i18n="s.g.rotate">Rotate providers automatically</span></label>
         </div>
         <div class="row" style="gap:12px;margin-top:10px">
-          <div class="field" style="max-width:180px"><label>Cards at a time</label><input type="number" min="0" max="6" data-bind="codexBar.pageSize" data-type="int"><span class="hint">0 = show all</span></div>
-          <div class="field" style="max-width:240px"><label>Rotate every (seconds)</label><input type="number" min="2" max="300" data-bind="codexBar.rotateInterval" data-type="int"><span class="hint">e.g. 5, 8, 15 seconds</span></div>
+          <div class="field" style="max-width:180px"><label data-i18n="s.g.cards">Cards at a time</label><input type="number" min="0" max="6" data-bind="codexBar.pageSize" data-type="int"><span class="hint" data-i18n="s.g.showAll">0 = show all</span></div>
+          <div class="field" style="max-width:240px"><label data-i18n="s.g.rotateEvery">Rotate every (seconds)</label><input type="number" min="2" max="300" data-bind="codexBar.rotateInterval" data-type="int"><span class="hint" data-i18n="s.g.rotateEg">e.g. 5, 8, 15 seconds</span></div>
         </div>
       </div>
 
       <div class="card">
         <h3 data-i18n="s.conn.title">Phone connection</h3>
         <div class="grid2">
-          <div class="field"><label data-i18n="s.conn.phoneToUse">Phone to use</label><select id="serial"></select><span class="hint">If several Android devices are connected, choose which one runs the panel.</span>
+          <div class="field"><label data-i18n="s.conn.phoneToUse">Phone to use</label><select id="serial"></select><span class="hint" data-i18n="s.g.serialHint">If several Android devices are connected, choose which one runs the panel.</span>
             <div class="row" id="appMissing" hidden style="margin-top:8px"><button class="btn primary sm" id="installApp" data-i18n="s.conn.installApp">Install the phone app</button><span class="hint" id="appMissingText"></span></div></div>
-          <div class="field"><label>Path to adb.exe (empty = auto-detect)</label><input type="text" data-bind="adbPath" placeholder="auto-detected"><span class="hint" id="adbFound"></span></div>
+          <div class="field"><label data-i18n="s.g.adbPath">Path to adb.exe (empty = auto-detect)</label><input type="text" data-bind="adbPath" placeholder="auto-detected" data-i18n-placeholder="s.g.autoDetected"><span class="hint" id="adbFound"></span></div>
         </div>
         <p id="usbProblem" hidden style="margin:10px 0 0;font-size:13px;color:var(--warn)"></p>
         <p id="webviewProblem" hidden style="margin:10px 0 0;font-size:13px;color:var(--warn)"></p>
       </div>
       <div class="card">
         <h3 data-i18n="s.phones.title">Phones</h3>
-        <p class="hint" style="margin:0 0 12px">Several phones (or a phone and a tablet) can use this computer at once, over USB or Wi-Fi. Give each one a
+        <p class="hint" style="margin:0 0 12px" data-i18n="s.g.phonesHint">Several phones (or a phone and a tablet) can use this computer at once, over USB or Wi-Fi. Give each one a
           name and choose the pages it shows; a phone shows all pages until you choose.</p>
         <div id="phoneList"><p class="hint" data-i18n="s.phones.empty">No phone has connected yet.</p></div>
       </div>
       <div class="card">
         <h3 data-i18n="s.wifi.title">Wi-Fi &amp; Tailscale</h3>
         <div class="row" style="margin-bottom:8px"><label class="switch"><input type="checkbox" data-bind="lan.enabled"><span></span></label> <span data-i18n="s.wifi.enable">Let the phone connect without the USB cable</span></div>
-        <p class="hint" style="margin:0 0 12px">Pair a phone by plugging it in once over USB after turning this on (and restarting), or without a cable:
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.wifiHint">Pair a phone by plugging it in once over USB after turning this on (and restarting), or without a cable:
           <b>Pair a phone over Wi-Fi</b> shows a QR code to scan with the phone's camera.
           The phone then talks HTTPS to this PC, trusts only this PC's certificate and has to present a secret key.
           The phone and this PC must be on the same network &mdash; or both on <a href="https://tailscale.com" target="_blank" rel="noopener">Tailscale</a>, which also works from another place or across separate Wi-Fi networks.
           Windows Firewall asks once &mdash; allow it (tick the network type Tailscale uses, too).</p>
         <div class="grid2">
           <div class="field"><label data-i18n="s.wifi.port">Port</label><input type="number" min="1024" max="65535" data-bind="lan.port" data-type="int"></div>
-          <div class="field"><label>Addresses offered to the phone</label><div id="lanHosts" class="hint">—</div></div>
+          <div class="field"><label data-i18n="s.g.lanHosts">Addresses offered to the phone</label><div id="lanHosts" class="hint">—</div></div>
         </div>
         <div class="row"><button class="btn primary" id="lanPair" data-i18n="s.wifi.pair">Pair a phone over Wi-Fi</button><button class="btn" id="lanRegen" data-i18n="s.wifi.newKey">New key (unpair phones)</button><span class="hint" id="lanStatus"></span></div>
       </div>
       <div class="card">
         <h3 data-i18n="s.updates.title">Updates</h3>
         <div class="row" style="margin-bottom:8px"><label class="switch"><input type="checkbox" data-bind="updates.auto"><span></span></label> <span data-i18n="s.updates.auto">Install new releases automatically</span></div>
-        <p class="hint" style="margin:0 0 12px">Checks <span id="updRepo"></span> on GitHub every 6 hours. The phone app is installed over USB without a prompt
+        <p class="hint" style="margin:0 0 12px" data-i18n-html="s.g.updHint">Checks <span id="updRepo"></span> on GitHub every 6 hours. The phone app is installed over USB without a prompt
           on the phone; the agent replaces its own files and restarts.</p>
         <dl id="updInfo"></dl>
         <div class="row" style="margin-top:12px"><button class="btn" id="updCheck" data-i18n="s.updates.check">Check now</button><button class="btn primary" id="updApply" hidden data-i18n="s.updates.apply">Update now</button><span class="hint" id="updState"></span></div>
@@ -669,7 +687,7 @@ dd { margin: 0; word-break: break-all; }
       <div class="card">
         <h3 data-i18n="s.webhooks.examples">Examples</h3>
         <div id="whExamples"></div>
-        <p class="hint">JSON payloads may carry <code>value</code>, <code>title</code>, <code>sub</code>, <code>unit</code>, <code>icon</code>, <code>color</code>,
+        <p class="hint" data-i18n-html="s.g.whPayload">JSON payloads may carry <code>value</code>, <code>title</code>, <code>sub</code>, <code>unit</code>, <code>icon</code>, <code>color</code>,
           <code>level</code> (ok / warn / error), <code>progress</code> (0&ndash;1 or 0&ndash;100), <code>items</code> (a list) and <code>ttl</code> (seconds).
           Plain text or a number works too. Notifications take <code>title</code>, <code>text</code>, <code>level</code>, <code>vibrate</code>,
           <code>seconds</code>, <code>wake</code> (light up the night screen) and <code>page</code> (switch to it).</p>
@@ -692,7 +710,7 @@ dd { margin: 0; word-break: break-all; }
         <div class="row" style="margin-top:10px"><button class="btn" id="applyJson" data-i18n="s.adv.applyJson">Apply JSON</button>
           <button class="btn" id="downloadJson" data-i18n="s.adv.download">Download settings</button><button class="btn" id="uploadJson" data-i18n="s.adv.upload">Load a settings file…</button>
           <span class="hint" id="jsonErr" style="color:var(--danger)"></span></div>
-        <p class="hint">The settings file includes your shortcut commands, tokens and keys: keep it private.</p>
+        <p class="hint" data-i18n="s.g.advPrivate">The settings file includes your shortcut commands, tokens and keys: keep it private.</p>
       </div>
     </section>
   </main>
@@ -745,40 +763,40 @@ function iconPicker(value, onPick, { collapsed = false } = {}) {
 }
 let osName = 'windows';
 const PRESETS_LINUX = [
-  ['', 'Pick a preset…'],
+  ['', 's.pr.pick'],
   ['x-terminal-emulator', 'Terminal'],
-  ['xdg-open', 'Open a folder or file (args: path, ~ = home)'],
-  ['https://', 'Web address (URL in the command field)'],
-  ['gtk-launch', 'Desktop app (args: name of its .desktop file)'],
+  ['xdg-open', 's.pr.xdgOpen'],
+  ['https://', 's.pr.url'],
+  ['gtk-launch', 's.pr.gtk'],
   ['gnome-control-center', 'GNOME Settings'],
   ['gnome-system-monitor', 'System Monitor'],
-  ['builtin:mute', 'Built-in: toggle mute'],
-  ['builtin:monitor-off', 'Built-in: turn monitors off (X11)'],
-  ['builtin:lock', 'Built-in: lock the session'],
+  ['builtin:mute', 's.pr.mute'],
+  ['builtin:monitor-off', 's.pr.monX11'],
+  ['builtin:lock', 's.pr.lockSession'],
 ];
 const PRESETS_MACOS = [
-  ['', 'Pick a preset…'],
-  ['open', 'Open an app (args: -a "App Name") or a folder (args: path)'],
-  ['https://', 'Web address (URL in the command field)'],
-  ['shortcuts', 'Run a Shortcut (args: run "Name")'],
+  ['', 's.pr.pick'],
+  ['open', 's.pr.macOpen'],
+  ['https://', 's.pr.url'],
+  ['shortcuts', 's.pr.macShortcut'],
   ['osascript', 'AppleScript (args: -e "…")'],
-  ['builtin:mute', 'Built-in: toggle mute'],
-  ['builtin:monitor-off', 'Built-in: sleep the display'],
-  ['builtin:lock', 'Built-in: lock (sleeps the display)'],
+  ['builtin:mute', 's.pr.mute'],
+  ['builtin:monitor-off', 's.pr.macSleep'],
+  ['builtin:lock', 's.pr.macLock'],
 ];
 const presets = () => (osName === 'linux' ? PRESETS_LINUX : osName === 'macos' ? PRESETS_MACOS : PRESETS);
 const PRESETS = [
-  ['', 'Pick a preset…'],
+  ['', 's.pr.pick'],
   ['wt.exe', 'Windows Terminal'],
-  ['explorer.exe', 'File Explorer (args: folder)'],
-  ['https://', 'Web address (URL in the command field)'],
-  ['shell:AppsFolder\\', 'Store app (shell:AppsFolder\\AppID)'],
+  ['explorer.exe', 's.pr.explorer'],
+  ['https://', 's.pr.url'],
+  ['shell:AppsFolder\\', 's.pr.store'],
   ['ms-settings:', 'Windows Settings'],
-  ['ms-screenclip:', 'Screen snip'],
+  ['ms-screenclip:', 's.pr.snip'],
   ['taskmgr.exe', 'Task Manager'],
-  ['builtin:mute', 'Built-in: toggle mute'],
-  ['builtin:monitor-off', 'Built-in: turn monitors off'],
-  ['builtin:lock', 'Built-in: lock the PC'],
+  ['builtin:mute', 's.pr.mute'],
+  ['builtin:monitor-off', 's.pr.monOff'],
+  ['builtin:lock', 's.pr.lockPc'],
 ];
 
 let cfg = null;        // settings being edited
@@ -941,16 +959,26 @@ function renderPages() {
   if (selPage >= cfg.pages.length) selPage = Math.max(0, cfg.pages.length - 1);
   const list = $('pageTabs');
   list.replaceChildren(...cfg.pages.map((p, i) => {
+    const pick = () => { selPage = i; selWidget = -1; renderPages(); $('pageTabs').querySelector('.ptab.on')?.focus({ preventScroll: true }); };
     const row = h('div', { class: 'ptab' + (i === selPage ? ' on' : '') + (p.enabled === false ? ' off' : ''), draggable: 'true', 'data-i': i,
-      onclick: () => { selPage = i; selWidget = -1; renderPages(); } },
-      h('span', { class: 'pt-num' }, String(i + 1)), h('span', { class: 'pt-ico' }, iconOf(p.icon || 'grid')), h('span', { class: 'pt-name' }, p.title || '(untitled)'),
+      role: 'button', tabindex: '0', 'aria-current': i === selPage ? 'page' : null,
+      onclick: () => { selPage = i; selWidget = -1; renderPages(); },
+      onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } } },
+      h('span', { class: 'pt-num' }, String(i + 1)), h('span', { class: 'pt-ico' }, iconOf(p.icon || 'grid')), h('span', { class: 'pt-name' }, p.title || t('s.u.untitled')),
       h('span', { class: 'pt-n' }, String((p.widgets || []).length)));
     dragSort(row, cfg.pages, (from, to) => { selPage = to; renderPages(); changed(); });
     return row;
   }), h('button', { class: 'btn', style: { width: '100%', marginTop: '8px' }, onclick: () => openTemplates(null) }, t('s.js.newPage')),
     h('div', { class: 'row', style: { gap: '6px', marginTop: '8px' } },
-      h('button', { class: 'btn sm', style: { flex: '1' }, title: 'Save all pages to a file', onclick: () => exportPages(cfg.pages, 'phonebox-pages') }, icon('download', 'm'), t('s.js.export')),
-      h('button', { class: 'btn sm', style: { flex: '1' }, title: 'Load pages from a file', onclick: importPages }, icon('upload', 'm'), t('s.js.import'))));
+      h('button', { class: 'btn sm', style: { flex: '1' }, title: t('s.u.savePagesFile'), onclick: () => exportPages(cfg.pages, 'phonebox-pages') }, icon('download', 'm'), t('s.js.export')),
+      h('button', { class: 'btn sm', style: { flex: '1' }, title: t('s.u.loadPagesFile'), onclick: importPages }, icon('upload', 'm'), t('s.js.import'))));
+  // in the one-column layout the list scrolls sideways: keep the picked page in view (scrollLeft only, never the page)
+  const on = list.querySelector('.ptab.on');
+  if (on && list.scrollWidth > list.clientWidth) {
+    const l = on.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft, r = l + on.offsetWidth;
+    if (l < list.scrollLeft) list.scrollLeft = l - 8;
+    else if (r > list.scrollLeft + list.clientWidth) list.scrollLeft = r - list.clientWidth + 8;
+  }
   renderPageEditor();
 }
 
@@ -977,20 +1005,20 @@ function renderPageEditor() {
       h('div', { class: 'row', style: { gap: '10px', marginTop: '8px' } },
         pageIcon.prev, pageIcon.input,
         h('input', { type: 'text', value: p.title || '', placeholder: t('s.js.pageName'), style: { flex: '1', fontSize: '16px', fontWeight: '600' }, oninput: (e) => { p.title = e.target.value; changed(); renderTabsOnly(); } }),
-        h('label', { class: 'check', title: 'Show this page on the phone' }, h('label', { class: 'switch' },
+        h('label', { class: 'check', title: t('s.u.showOnPhone') }, h('label', { class: 'switch' },
           h('input', { type: 'checkbox', checked: p.enabled !== false, onchange: (e) => {
             if (!e.target.checked && cfg.pages.filter((x) => x.enabled !== false).length === 1) { e.target.checked = true; toast(t('s.js.keepOnePage'), true); return; }
             p.enabled = e.target.checked; changed(); renderTabsOnly();
           } }), h('span')), t('s.js.shown')),
-        h('button', { class: 'icon-btn', title: 'Move earlier', disabled: selPage === 0, onclick: () => move(-1) }, icon('chevron-up')),
-        h('button', { class: 'icon-btn', title: 'Move later', disabled: selPage === cfg.pages.length - 1, onclick: () => move(1) }, icon('chevron-down'))),
+        h('button', { class: 'icon-btn', title: t('s.u.moveUp'), disabled: selPage === 0, onclick: () => move(-1) }, icon('chevron-up')),
+        h('button', { class: 'icon-btn', title: t('s.u.moveDown'), disabled: selPage === cfg.pages.length - 1, onclick: () => move(1) }, icon('chevron-down'))),
       h('div', { class: 'row', style: { gap: '6px', marginTop: '10px' } },
         h('button', { class: 'btn sm', onclick: () => openTemplates(selPage) }, t('s.js.replaceTpl')),
         h('button', { class: 'btn sm', onclick: () => { const c = JSON.parse(JSON.stringify(p)); c.id = ''; c.title += t('s.js.dupPageSuffix'); cfg.pages.splice(selPage + 1, 0, c); selPage++; renderPages(); changed(); } }, t('s.js.dupPage')),
-        h('button', { class: 'btn sm', title: 'Save this page to a file to share it or use it on another computer', onclick: () => exportPages([p], 'phonebox-page-' + (p.id || 'page')) }, t('s.js.exportPage')),
+        h('button', { class: 'btn sm', title: t('s.u.exportPageHint'), onclick: () => exportPages([p], 'phonebox-page-' + (p.id || 'page')) }, t('s.js.exportPage')),
         h('button', { class: 'btn sm', onclick: () => { p.widgets = []; selWidget = -1; renderPageEditor(); changed(); } }, t('s.js.clear')),
         h('span', { class: 'spacer' }),
-        h('button', { class: 'btn sm' + (isHome(p) ? ' on' : ''), title: 'The page the panel comes back to (idle return, Back key)',
+        h('button', { class: 'btn sm' + (isHome(p) ? ' on' : ''), title: t('s.u.homeHint'),
           onclick: () => { if (!p.id) { toast(t('s.js.saveFirstForId'), true); return; } cfg.display.homePage = p.id; renderPageEditor(); changed(); } },
           icon('home', 'm'), isHome(p) ? t('s.js.homePage') : t('s.js.makeHome')),
         h('label', { class: 'hint', title: t('s.js.backHomeAfterHint') }, t('s.js.backHomeAfter'),
@@ -1000,7 +1028,7 @@ function renderPageEditor() {
         h('button', { class: 'btn sm danger', disabled: cfg.pages.length === 1, onclick: () => {
           if (!confirm(t('s.js.deletePageConfirm', { title: p.title }))) return;
           cfg.pages.splice(selPage, 1); selWidget = -1; renderPages(); changed();
-        } }, 'Delete page'))));
+        } }, t('s.u.deletePage')))));
   $('peHead').append(appearanceEditor(p, () => [cfg.display?.appearance], t('s.js.pageAppearance')));
   $('peRest').replaceChildren(
     h('p', { class: 'hint layout-hint', style: { margin: '6px 0 14px' } }, t('s.js.layoutHint')),
@@ -1033,7 +1061,7 @@ function setStage(mode) {
     ? 'The real panel with your unsaved changes and live data: tap and swipe it like the phone. Switch back to Layout to move widgets.'
     : '';
   if (live && !previewFrame) {
-    previewFrame = h('iframe', { src: '../panel/?preview=1', title: 'Live preview of the panel' });
+    previewFrame = h('iframe', { src: '../panel/?preview=1', title: t('s.u.livePreviewTitle') });
     $('previewBox').appendChild(previewFrame);
     const fit = () => { previewFrame.style.transform = `scale(${$('previewBox').clientWidth / 780})`; };
     new ResizeObserver(fit).observe($('previewBox'));
@@ -1064,11 +1092,11 @@ setStage(stageMode);
 function renderTabsOnly() {
   const tabs = $('pageTabs').querySelectorAll('.ptab');
   cfg.pages.forEach((p, i) => {
-    const t = tabs[i];
-    if (!t) return;
-    t.querySelector('.pt-ico').replaceChildren(iconOf(p.icon || 'grid'));
-    t.querySelector('.pt-name').textContent = p.title || '(untitled)';
-    t.classList.toggle('off', p.enabled === false);
+    const tab = tabs[i];
+    if (!tab) return;
+    tab.querySelector('.pt-ico').replaceChildren(iconOf(p.icon || 'grid'));
+    tab.querySelector('.pt-name').textContent = p.title || t('s.u.untitled');
+    tab.classList.toggle('off', p.enabled === false);
   });
 }
 
@@ -1081,7 +1109,7 @@ function renderCanvas() {
     const d = widgetDef(w.type);
     const el = h('div', { class: 'wb' + (i === selWidget ? ' sel' : ''), title: d.name },
       h('div', { class: 'wb-in' }, h('span', { class: 'wb-ico' }, iconOf(d.icon)), h('b', {}, d.name), h('small', {}, widgetSummary(w))),
-      h('span', { class: 'rz', title: 'Resize' }));
+      h('span', { class: 'rz', title: t('s.u.resize') }));
     el.style.gridArea = `${w.y + 1} / ${w.x + 1} / span ${w.h} / span ${w.w}`;
     el.addEventListener('pointerdown', (e) => startDrag(e, w, i, e.target.classList.contains('rz') ? 'resize' : 'move'));
 
@@ -1295,20 +1323,20 @@ function renderStackWidgetsOption(w, o) {
         }
       }
     },
-      h('span', { class: 'stack-row-handle', title: 'Drag to reorder' }, '⋮⋮'),
+      h('span', { class: 'stack-row-handle', title: t('s.u.dragReorder') }, '⋮⋮'),
       h('input', {
         type: 'checkbox',
         class: 'stack-row-check',
-        title: item.enabled ? 'Enabled (shown in rotation)' : 'Disabled (hidden)',
+        title: item.enabled ? t('s.u.stackOn') : t('s.u.stackOff'),
         checked: item.enabled,
         onchange: (e) => { e.stopPropagation(); item.enabled = e.target.checked; save(); }
       }),
       h('span', { class: 'stack-row-ico' }, iconOf(d.icon)),
-      h('span', { class: 'stack-row-name', title: 'Click to edit settings' }, d.name),
-      h('span', { class: 'stack-row-chevron', title: isOpen ? 'Close settings' : 'Open settings' }, icon(isOpen ? 'chevron-down' : 'chevron-right')),
+      h('span', { class: 'stack-row-name', title: t('s.u.clickEdit') }, d.name),
+      h('span', { class: 'stack-row-chevron', title: isOpen ? t('s.u.closeSettings') : t('s.u.openSettings') }, icon(isOpen ? 'chevron-down' : 'chevron-right')),
       h('div', { class: 'stack-row-actions' },
-        h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move up', disabled: i === 0, onclick: (e) => { e.stopPropagation(); move(i, i - 1); } }, icon('chevron-up')),
-        h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move down', disabled: i === items.length - 1, onclick: (e) => { e.stopPropagation(); move(i, i + 1); } }, icon('chevron-down')),
+        h('button', { type: 'button', class: 'stack-btn-sm', title: t('s.u.moveUp'), disabled: i === 0, onclick: (e) => { e.stopPropagation(); move(i, i - 1); } }, icon('chevron-up')),
+        h('button', { type: 'button', class: 'stack-btn-sm', title: t('s.u.moveDown'), disabled: i === items.length - 1, onclick: (e) => { e.stopPropagation(); move(i, i + 1); } }, icon('chevron-down')),
         h('button', { type: 'button', class: 'stack-btn-sm stack-btn-del', title: t('s.js.remove'), onclick: (e) => { e.stopPropagation(); remove(i); } }, icon('close'))
       )
     );
@@ -1328,7 +1356,7 @@ function renderStackWidgetsOption(w, o) {
               item.options[key] = val;
               save(false);
             }))
-          : [h('p', { class: 'hint', style: { margin: '2px 0 0', fontSize: '12px' } }, 'This widget has no additional settings.')])
+          : [h('p', { class: 'hint', style: { margin: '2px 0 0', fontSize: '12px' } }, t('s.u.noOptions'))])
       );
       rowsAndConfigs.push(configBox);
     }
@@ -1359,7 +1387,7 @@ function renderStackWidgetsOption(w, o) {
     }
   },
     h('span', { style: { fontSize: '18px' } }, icon('plus')),
-    h('span', {}, items.length ? 'Drag a widget here from the palette' : 'Stack is empty. Drag a widget here from the palette')
+    h('span', {}, items.length ? t('s.u.stackDrop') : t('s.u.stackEmpty'))
   );
 
   const quickSelect = h('div', { class: 'row', style: { gap: '6px', marginTop: '8px' } },
@@ -1449,7 +1477,7 @@ function optionField(w, o, onValChange) {
     }
     case 'control-target': {
       let selected = v;
-      const select = h('select', { onchange: e => { selected=e.target.value; set(o.key, selected); } }, h('option', { value: '' }, '(automatic / all)'));
+      const select = h('select', { onchange: e => { selected=e.target.value; set(o.key, selected); } }, h('option', { value: '' }, t('s.u.autoAll')));
       const load = async () => {
         try {
           const response = await fetch('/api/controls/state');
@@ -1458,7 +1486,7 @@ function optionField(w, o, onValChange) {
           let items = o.group === 'application' ? [...new Set((data.audio?.sessions || []).map(s => s.name))].map(name => ({ id: name, name }))
             : o.group === 'media' ? data.media || [] : o.group === 'monitor' ? data.monitors || []
             : (data.audio?.devices || []).filter(d => !o.group || d.direction === o.group);
-          select.replaceChildren(h('option', { value: '' }, '(automatic / all)'),
+          select.replaceChildren(h('option', { value: '' }, t('s.u.autoAll')),
             ...items.map(item => h('option', { value: item.id, selected: item.id === selected }, item.name)));
           if (selected && !items.some(item => item.id === selected)) select.append(h('option', { value: selected, selected: true }, 'Unavailable: ' + selected));
         } catch (_) { }
@@ -1470,17 +1498,17 @@ function optionField(w, o, onValChange) {
       return field(h('input', { type: 'number', min: o.min, max: o.max, value: v ?? '', style: { maxWidth: '140px' }, onchange: (e) => set(o.key, e.target.value === '' ? o.default : Number(e.target.value)) }));
     case 'textarea':
       return field(h('textarea', { rows: /^command/.test(o.key) ? 3 : 4, style: /^command/.test(o.key) ? { fontFamily: 'Consolas, monospace', fontSize: '12.5px' } : {}, oninput: (e) => set(o.key, e.target.value) }, v ?? ''),
-        o.key === 'command' ? h('span', { class: 'hint' }, 'Runs with PowerShell on Windows. The phone never sees the command, only its output. Tap the widget on the phone to run it now.')
-          : o.key === 'commandUnix' ? h('span', { class: 'hint' }, 'On Linux (bash) and macOS (zsh) this one runs instead; empty = the command above.') : null);
+        o.key === 'command' ? h('span', { class: 'hint' }, t('s.u.cmdHint'))
+          : o.key === 'commandUnix' ? h('span', { class: 'hint' }, t('s.u.cmdUnixHint')) : null);
     case 'lines':
       return field(h('textarea', { rows: 5, oninput: (e) => set(o.key, e.target.value.split('\n').map((x) => x.trim()).filter(Boolean)) }, (Array.isArray(v) ? v : []).join('\n')));
     case 'color':
       return field(h('div', { class: 'row', style: { gap: '8px' } }, h('input', { type: 'color', value: v || '#fbbf24', oninput: (e) => set(o.key, e.target.value) }),
         h('div', { class: 'swatches' }, ...COLORS.map((c) => h('button', { style: { background: c }, onclick: () => { set(o.key, c); renderInspector(); } })))));
     case 'shortcut':
-      return field(h('select', { onchange: (e) => set(o.key, e.target.value) }, h('option', { value: '' }, '(first shortcut)'),
+      return field(h('select', { onchange: (e) => set(o.key, e.target.value) }, h('option', { value: '' }, t('s.u.firstShortcut')),
         ...cfg.shortcuts.map((s) => h('option', { value: s.id, selected: s.id === v }, `${iconText(s.icon)} ${s.label}`.trim()))),
-        h('span', { class: 'hint' }, 'New shortcuts get their id when you save.'));
+        h('span', { class: 'hint' }, t('s.u.shortcutIdHint')));
     case 'shortcuts': {
       const cur = () => { const x = optVal(w, o); return Array.isArray(x) ? x : []; };
       return field(h('div', { class: 'opts' }, ...cfg.shortcuts.map((s) => h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: cur().includes(s.id), onchange: (e) => {
@@ -1489,7 +1517,7 @@ function optionField(w, o, onValChange) {
     }
     default:
       return field(h('input', { type: 'text', value: v ?? '', oninput: (e) => set(o.key, e.target.value) }),
-        w.type === 'push' && o.key === 'key' ? h('span', { class: 'hint' }, 'Send data with POST /api/push/<key> — see the Webhooks section.') : null);
+        w.type === 'push' && o.key === 'key' ? h('span', { class: 'hint' }, t('s.u.pushHint')) : null);
   }
 }
 
@@ -1508,7 +1536,7 @@ function openTemplates(index) {
     // a template lists only what differs from the defaults; the rest is written out like for a widget added by hand
     for (const w of widgets) w.options = { ...defaultOptions(w.type), ...(w.options || {}) };
     if (index == null) {
-      cfg.pages.push({ id: '', title: t ? t.title : 'New page', icon: t ? t.icon : 'icon:grid', enabled: true, widgets });
+      cfg.pages.push({ id: '', title: t ? t.title : PhoneBoxI18n.t('s.u.newPage'), icon: t ? t.icon : 'icon:grid', enabled: true, widgets });
       selPage = cfg.pages.length - 1;
     } else {
       cfg.pages[index].widgets = widgets;
@@ -1517,9 +1545,9 @@ function openTemplates(index) {
     closeModal(); renderPages(); changed();
   };
   $('modalBody').replaceChildren(
-    h('h3', {}, index == null ? 'New page' : `Replace the widgets of "${cfg.pages[index].title}"`),
+    h('h3', {}, index == null ? t('s.u.newPage') : t('s.u.replaceWidgets', { title: cfg.pages[index].title })),
     h('div', { class: 'tpl-grid' },
-      h('button', { class: 'tpl', onclick: () => pick(null) }, h('div', { class: 'mini empty-mini' }, icon('plus')), h('b', {}, 'Blank page'), h('small', {}, 'Start from an empty grid.')),
+      h('button', { class: 'tpl', onclick: () => pick(null) }, h('div', { class: 'mini empty-mini' }, icon('plus')), h('b', {}, t('s.u.blankPage')), h('small', {}, t('s.u.blankPageHint'))),
       ...catalog.templates.map((t) => h('button', { class: 'tpl', onclick: () => pick(t) }, miniMap(t.widgets), h('b', {}, ...withIcon(t.icon, t.title)), h('small', {}, t.desc)))));
   $('modal').hidden = false;
 }
@@ -1539,29 +1567,29 @@ async function pairOverWifi() {
   const cancel = () => fetch('/api/pair/cancel?attempt=' + encodeURIComponent(r.attempt), { method: 'POST' }).catch(() => {});
   if (mine !== pairAttempt) { if (r.enabled) cancel(); return; } // started again meanwhile
   if (!r.enabled) {
-    toast(r.configured ? 'Restart the agent first (Wi-Fi was just turned on)' : 'Turn on “Let the phone connect without the USB cable”, save and restart first', true);
+    toast(r.configured ? t('s.u.pairRestart') : t('s.u.pairTurnOn'), true);
     return;
   }
   const svg = (markup) => 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(markup)));
   const left = h('b', {}, '');
   const pairBox = h('div', { class: 'pair-qr' },
-    h('b', {}, '2. Scan this with the phone’s camera'),
-    h('img', { src: svg(r.qr), alt: 'Pairing QR code' }),
-    h('small', { class: 'hint' }, 'Open the link it shows and choose PhoneBox. The phone asks you to confirm the code ', h('b', {}, r.check), '. ', left));
+    h('b', {}, t('s.u.pairStep2')),
+    h('img', { src: svg(r.qr), alt: t('s.u.pairQrAlt') }),
+    h('small', { class: 'hint' }, t('s.u.pairConfirm'), h('b', {}, r.check), '. ', left));
   $('modalBody').replaceChildren(
-    h('h3', {}, `Pair a phone with ${r.pc}`),
-    h('p', { class: 'hint', style: 'margin:0' }, 'No USB cable, developer options or adb needed. The phone and this computer must be on the same network (or both on Tailscale).'),
+    h('h3', {}, t('s.u.pairTitle', { pc: r.pc })),
+    h('p', { class: 'hint', style: 'margin:0' }, t('s.u.pairLead')),
     h('div', { class: 'pair-qrs' },
       h('div', { class: 'pair-qr' },
-        h('b', {}, '1. Install the app (skip if it is installed)'),
-        h('img', { src: svg(r.appQr), alt: 'QR code of the app download' }),
-        h('small', { class: 'hint' }, 'Downloads the PhoneBox app. Android asks once to allow installing apps from the browser.')),
+        h('b', {}, t('s.u.pairStep1')),
+        h('img', { src: svg(r.appQr), alt: t('s.u.pairAppAlt') }),
+        h('small', { class: 'hint' }, t('s.u.pairAppHint'))),
       pairBox),
     h('p', { class: 'hint', style: 'margin:0' }, r.hosts.length
-      ? `The phone will connect to ${r.hosts.join(', ')} on port ${r.port}. The code works once, for 5 minutes; the key itself is not in the QR code.`
-      : 'No LAN or Tailscale address was found on this computer, so the phone has nothing to connect to.'),
+      ? t('s.u.pairHosts', { hosts: r.hosts.join(', '), port: r.port })
+      : t('s.u.pairNoHost')),
     h('div', { class: 'row', style: 'margin-top:8px' },
-      h('button', { class: 'btn sm', onclick: () => { navigator.clipboard?.writeText(r.link); toast(t('s.js.pairLinkCopied')); } }, 'Copy the pairing link')));
+      h('button', { class: 'btn sm', onclick: () => { navigator.clipboard?.writeText(r.link); toast(t('s.js.pairLinkCopied')); } }, t('s.u.pairCopy'))));
   const tick = async () => {
     try {
       const s = await (await fetch('/api/pair/status')).json();
@@ -1587,7 +1615,7 @@ async function loadPhones() {
 }
 function renderPhones() {
   cfg.phones ??= [];
-  const ago = (ms) => { if (!ms) return 'not seen since the agent started'; const s = (Date.now() - ms) / 1000; return s < 15 ? 'connected now' : s < 3600 ? `seen ${Math.round(s / 60)} min ago` : `seen ${Math.round(s / 3600)} h ago`; };
+  const ago = (ms) => { if (!ms) return t('s.ph.notSeen'); const s = (Date.now() - ms) / 1000; return s < 15 ? t('s.ph.now') : s < 3600 ? t('s.ph.minAgo', { n: Math.round(s / 60) }) : t('s.ph.hAgo', { n: Math.round(s / 3600) }); };
   const list = phonesSeen.length ? phonesSeen : [];
   if (!list.length) { $('phoneList').replaceChildren(h('p', { class: 'hint', 'data-i18n': 's.phones.empty' }, t('s.phones.empty'))); return; }
   const entry = (id) => { let e = cfg.phones.find((x) => x.id === id); if (!e) { e = { id, name: '', pages: null }; cfg.phones.push(e); } return e; };
@@ -1598,12 +1626,12 @@ function renderPhones() {
     const wvMajor = ph.webView ? ph.webView.split('/')[1]?.split(/[.-]/)[0] : '';
     return h('div', { class: 'phone-row' },
       h('div', { class: 'row' },
-        h('input', { type: 'text', value: conf?.name || '', placeholder: ph.model || 'Phone', style: { maxWidth: '220px' }, oninput: (e) => { entry(ph.id).name = e.target.value; changed(); } }),
-        h('span', { class: 'hint' }, `${ph.model || 'Android device'} · ${ago(ph.lastSeen)}${ph.via ? ' over ' + ph.via : ''}${wvMajor ? ' · WebView ' + wvMajor : ''}`)),
+        h('input', { type: 'text', value: conf?.name || '', placeholder: ph.model || t('s.ph.phone'), style: { maxWidth: '220px' }, oninput: (e) => { entry(ph.id).name = e.target.value; changed(); } }),
+        h('span', { class: 'hint' }, `${ph.model || t('s.ph.android')} · ${ago(ph.lastSeen)}${ph.via ? ' ' + t('s.ph.over', { via: ph.via }) : ''}${wvMajor ? ' · WebView ' + wvMajor : ''}`)),
       ph.webviewProblem ? h('p', { class: 'hint', style: { margin: '6px 0 0', color: 'var(--warn)' } }, icon('warning-triangle', 'm'), ph.webviewProblem) : null,
       h('label', { class: 'check', style: { marginTop: '8px' } },
         h('input', { type: 'checkbox', checked: all, onchange: (e) => { entry(ph.id).pages = e.target.checked ? null : cfg.pages.map((p) => p.id).filter(Boolean); changed(); renderPhones(); } }),
-        'Shows all pages'),
+        t('s.ph.allPages')),
       all ? null : h('div', { class: 'phone-pages' }, ...cfg.pages.filter((p) => p.id).map((p) => h('label', { class: 'check' },
         h('input', { type: 'checkbox', checked: chosen.includes(p.id), onchange: (e) => {
           const e2 = entry(ph.id);
@@ -1632,7 +1660,7 @@ function pickFile() {
 function exportPages(pages, name) {
   const withCommands = pages.some((p) => (p.widgets || []).some((w) => w.type === 'command' || w.type === 'html'));
   download(name, { phonebox: 'pages', version: 1, exported: new Date().toISOString(), pages: JSON.parse(JSON.stringify(pages)) });
-  toast(withCommands ? 'Exported — it includes command / custom HTML widgets: check them before sharing' : 'Exported');
+  toast(withCommands ? t('s.u.exportedRisky') : t('s.u.exported'));
 }
 async function importPages() {
   const text = await pickFile();
@@ -1678,20 +1706,20 @@ const CAL_COLORS = ['#60a5fa', '#f472b6', '#34d399', '#fbbf24', '#a78bfa', '#f87
 function renderCalendars() {
   cfg.calendars ??= [];
   $('calList').replaceChildren(...cfg.calendars.map((c, i) => h('div', { class: 'cal-row' },
-    h('input', { type: 'text', value: c.name || '', placeholder: 'Name, e.g. Work', oninput: (e) => { c.name = e.target.value; changed(); } }),
+    h('input', { type: 'text', value: c.name || '', placeholder: t('s.u.nameWork'), oninput: (e) => { c.name = e.target.value; changed(); } }),
     h('input', { type: 'text', class: 'cal-url', value: c.url || '', placeholder: 'https://calendar.google.com/calendar/ical/…/basic.ics', spellcheck: 'false',
       oninput: (e) => { c.url = e.target.value.trim(); changed(); } }),
-    h('input', { type: 'color', value: c.color || CAL_COLORS[i % CAL_COLORS.length], title: 'Colour', oninput: (e) => { c.color = e.target.value; changed(); } }),
+    h('input', { type: 'color', value: c.color || CAL_COLORS[i % CAL_COLORS.length], title: t('s.z.colour'), oninput: (e) => { c.color = e.target.value; changed(); } }),
     h('button', { class: 'btn sm danger', onclick: () => { cfg.calendars.splice(i, 1); renderCalendars(); changed(); } }, t('s.js.remove')))));
 }
 $('installApp').onclick = async () => {
   $('installApp').disabled = true;
-  $('appMissingText').textContent = 'downloading and installing… (allow it on the phone if it asks)';
+  $('appMissingText').textContent = t('s.cn.installing');
   try {
     const r = await fetch('/api/phone/install', { method: 'POST' });
     const j = await r.json().catch(() => ({}));
-    $('appMissingText').textContent = r.ok ? 'Installed — the panel opens in a few seconds' : (j.error || 'Could not install it');
-  } catch (_) { $('appMissingText').textContent = 'Could not install it'; }
+    $('appMissingText').textContent = r.ok ? t('s.cn.installed') : (j.error || t('s.cn.installFail'));
+  } catch (_) { $('appMissingText').textContent = t('s.cn.installFail'); }
   $('installApp').disabled = false;
   setTimeout(loadInfo, 4000);
 };
@@ -1723,8 +1751,8 @@ function renderConsole() {
   const field = (p, key, placeholder) => h('input', { type: 'text', value: p[key] || '', placeholder, spellcheck: 'false',
     oninput: (e) => { p[key] = e.target.value.trim() || null; changed(); } });
   $('consoleList').replaceChildren(...cfg.console.profiles.map((p, i) => h('div', { class: 'console-row' },
-    h('input', { type: 'text', value: p.label || '', maxlength: '40', placeholder: 'Name, e.g. Photoshop', oninput: (e) => { p.label = e.target.value; changed(); } }),
-    h('input', { type: 'text', value: p.apps || '', placeholder: 'Apps, e.g. photoshop, gimp-2.10', spellcheck: 'false', oninput: (e) => { p.apps = e.target.value; changed(); } }),
+    h('input', { type: 'text', value: p.label || '', maxlength: '40', placeholder: t('s.u.namePhotoshop'), oninput: (e) => { p.label = e.target.value; changed(); } }),
+    h('input', { type: 'text', value: p.apps || '', placeholder: t('s.u.appsPlaceholder'), spellcheck: 'false', oninput: (e) => { p.apps = e.target.value; changed(); } }),
     h('textarea', { rows: '4', spellcheck: 'false', placeholder: 'Undo = ctrl+z\nRedo = ctrl+shift+z\nBrush = b',
       oninput: (e) => { p.keys = consoleKeysParse(e.target.value); changed(); } }, consoleKeysText(p)),
     h('div', { class: 'console-dial' },
@@ -1758,7 +1786,7 @@ async function renderNetAdapters() {
 function renderFeeds() {
   cfg.feeds ??= [];
   $('feedList').replaceChildren(...cfg.feeds.map((f, i) => h('div', { class: 'cal-row feed-row' },
-    h('input', { type: 'text', value: f.name || '', maxlength: '60', placeholder: 'Name, e.g. News', oninput: (e) => { f.name = e.target.value; changed(); } }),
+    h('input', { type: 'text', value: f.name || '', maxlength: '60', placeholder: t('s.u.nameNews'), oninput: (e) => { f.name = e.target.value; changed(); } }),
     h('input', { type: 'text', class: 'cal-url', value: f.url || '', placeholder: 'https://example.com/feed.xml', spellcheck: 'false',
       oninput: (e) => { f.url = e.target.value.trim(); changed(); } }),
     h('button', { class: 'btn sm danger', onclick: () => { cfg.feeds.splice(i, 1); renderFeeds(); changed(); } }, t('s.js.remove')))));
@@ -1776,48 +1804,50 @@ $('calAdd').onclick = () => {
 
 // ---------------------------------------------------------------- rules
 const TRIGGERS = {
-  'session-waiting': { label: 'an AI session needs me', match: 'any project (or: api|docs, codex)' },
-  'session-busy': { label: 'an AI session is working', match: 'any project (or: api|docs, codex)' },
-  'media-playing': { label: 'music or video plays', match: 'any app (or: Spotify|Music)' },
-  'process-running': { label: 'an app is running', match: 'zoom|Teams|obs64' },
-  'app-in-front': { label: 'an app is in front', match: 'Code|obs64|Safari' },
-  'mic-in-use': { label: 'the microphone is in use', match: 'any app (or: Zoom|Teams)' },
-  'camera-in-use': { label: 'the camera is in use', match: 'any app (or: Zoom|Teams)' },
-  'calendar-event': { label: 'a calendar event is on', match: 'any event (or: meeting|call)' },
-  'obs-live': { label: 'OBS is recording or streaming' },
-  'cpu-above': { label: 'the CPU is busy', value: '% (for 15 s)', def: 85 },
-  idle: { label: 'I am away from the PC', value: 'minutes', def: 5 },
-  time: { label: 'it is between', match: '22:00-07:00' },
-  push: { label: 'a pushed value', match: 'key, e.g. doorbell' },
-  'quota-above': { label: 'an AI quota is above', value: '%', def: 80, match: 'any (or: claude|codex)' },
-  'review-requested': { label: 'a GitHub review is requested', match: 'any repo (or: api|web)' },
-  'ci-failed': { label: 'CI fails on my pull request', match: 'any repo (or: api|web)' },
-  'battery-low': { label: 'a device battery is below', value: '%', def: 20, match: 'any device (or: mouse|headset)' },
-  'ping-high': { label: 'the network is slow', value: 'ms (or unreachable)', def: 150 },
-  always: { label: 'always (use the days and hours below)' },
+  'session-waiting': { label: 's.rt.sessionWaiting', match: 's.rt.mProject' },
+  'session-busy': { label: 's.rt.sessionBusy', match: 's.rt.mProject' },
+  'media-playing': { label: 's.rt.mediaPlaying', match: 's.rt.mApp' },
+  'process-running': { label: 's.rt.processRunning', match: 'zoom|Teams|obs64' },
+  'app-in-front': { label: 's.rt.appInFront', match: 'Code|obs64|Safari' },
+  'mic-in-use': { label: 's.rt.micInUse', match: 's.rt.mAppMeet' },
+  'camera-in-use': { label: 's.rt.cameraInUse', match: 's.rt.mAppMeet' },
+  'calendar-event': { label: 's.rt.calendarEvent', match: 's.rt.mEvent' },
+  'obs-live': { label: 's.rt.obsLive' },
+  'cpu-above': { label: 's.rt.cpuAbove', value: 's.rt.vCpu', def: 85 },
+  idle: { label: 's.rt.idle', value: 's.rt.vMin', def: 5 },
+  time: { label: 's.rt.time', match: '22:00-07:00' },
+  push: { label: 's.rt.push', match: 's.rt.mKey' },
+  'quota-above': { label: 's.rt.quotaAbove', value: '%', def: 80, match: 's.rt.mQuota' },
+  'review-requested': { label: 's.rt.reviewRequested', match: 's.rt.mRepo' },
+  'ci-failed': { label: 's.rt.ciFailed', match: 's.rt.mRepo' },
+  'battery-low': { label: 's.rt.batteryLow', value: '%', def: 20, match: 's.rt.mDevice' },
+  'ping-high': { label: 's.rt.pingHigh', value: 's.rt.vPing', def: 150 },
+  always: { label: 's.rt.always' },
 };
-const ACTIONS = { goto: 'show the page', notify: 'show a notification', push: 'push a value', shortcut: 'run a shortcut' };
-const DAYS = [['mon', 'Mo'], ['tue', 'Tu'], ['wed', 'We'], ['thu', 'Th'], ['fri', 'Fr'], ['sat', 'Sa'], ['sun', 'Su']];
-const PRIORITIES = { 2: 'low', 5: 'normal', 8: 'high' };
+const ACTIONS = { goto: 's.rt.aGoto', notify: 's.rt.aNotify', push: 's.rt.aPush', shortcut: 's.rt.aShortcut' };
+const DAYS = [['mon', 's.rt.dMon'], ['tue', 's.rt.dTue'], ['wed', 's.rt.dWed'], ['thu', 's.rt.dThu'], ['fri', 's.rt.dFri'], ['sat', 's.rt.dSat'], ['sun', 's.rt.dSun']];
+const PRIORITIES = { 2: 's.rt.pLow', 5: 's.rt.pNormal', 8: 's.rt.pHigh' };
+// labels above are i18n keys (these run before t() exists); L() translates them at render time
+const L = (s) => (typeof s === 'string' && s.startsWith('s.') ? t(s) : s);
 const pageId = (...ids) => ids.find((id) => cfg.pages.some((p) => p.id === id)) || cfg.pages[0]?.id || '';
 const RULE_PRESETS = [
-  ['asterisk', 'Claude needs me → AI page', () => ({ name: 'Claude needs me', when: 'session-waiting', then: 'goto', page: pageId('ai', 'work'), whileActive: true })],
-  ['music', 'Music plays → music page', () => ({ name: 'Music', when: 'media-playing', match: 'Spotify', then: 'goto', page: pageId('music', 'home'), whileActive: true })],
-  ['record', 'On air while the mic is on', () => (osName === 'macos'
-    ? { name: 'On air', when: 'process-running', match: 'zoom.us|Microsoft Teams|FaceTime', then: 'push', key: 'onair', pushValue: 'On air', whileActive: true }
-    : { name: 'On air', when: 'mic-in-use', then: 'notify', text: '{detail} is using the microphone', level: 'warn', whileActive: false })],
-  ['calendar-days', 'In a meeting → on air', () => ({ name: 'In a meeting', when: 'calendar-event', then: 'push', key: 'onair', pushValue: '{detail}', whileActive: true })],
-  ['flame', 'CPU busy → notification', () => ({ name: 'CPU busy', when: 'cpu-above', value: 90, then: 'notify', text: '{detail} for a while', level: 'warn', whileActive: false })],
-  ['moon', 'Away → ambient page', () => ({ name: 'Away', when: 'idle', value: 10, then: 'goto', page: pageId('ambient', 'clock', 'calm'), whileActive: true })],
-  ['clock', 'Evenings → calm page', () => ({ name: 'Evenings', when: 'time', match: '22:00-07:00', then: 'goto', page: pageId('calm', 'clock', 'ambient'), whileActive: true })],
-  ['bell', 'Doorbell → notification', () => ({ name: 'Doorbell', when: 'push', match: 'doorbell', then: 'notify', text: 'Someone is at the door', level: 'warn', whileActive: false })],
-  ['target', 'Quota above 80 % → warning', () => ({ name: 'Quota', when: 'quota-above', value: 80, then: 'notify', text: '{detail}', level: 'warn', whileActive: false, cooldownMin: 60 })],
-  ['eye', 'Review requested → work page', () => ({ name: 'Review requested', when: 'review-requested', then: 'goto', page: pageId('work', 'devops'), whileActive: false, priority: 2, cooldownMin: 30, days: 'mon,tue,wed,thu,fri', during: '09:00-18:00' })],
-  ['x-circle', 'CI failed → notification', () => ({ name: 'CI failed', when: 'ci-failed', then: 'notify', text: '{detail}', level: 'error', whileActive: false })],
-  ['sunrise', 'Workday mornings → daily page', () => ({ name: 'Morning', when: 'always', during: '08:30-09:30', days: 'mon,tue,wed,thu,fri', then: 'goto', page: pageId('daily', 'home'), whileActive: true, priority: 2 })],
-  ['battery-low', 'Mouse battery low', () => ({ name: 'Battery low', when: 'battery-low', value: 15, then: 'notify', text: '{detail} — time to charge', level: 'warn', whileActive: false, cooldownMin: 240 })],
-  ['thermometer', 'Too warm (webhook value)', () => ({ name: 'Too warm', when: 'push', match: 'temperature', op: '>', arg: '28', then: 'notify', text: 'It is {detail} °C', level: 'warn', whileActive: false, cooldownMin: 60 })],
-  ['plus', 'Empty rule', () => ({ name: '', when: 'session-waiting', then: 'goto', page: pageId('home'), whileActive: true })],
+  ['asterisk', 's.rt.pClaude', () => ({ name: t('s.rn.nClaude'), when: 'session-waiting', then: 'goto', page: pageId('ai', 'work'), whileActive: true })],
+  ['music', 's.rt.pMusic', () => ({ name: t('s.rn.nMusic'), when: 'media-playing', match: 'Spotify', then: 'goto', page: pageId('music', 'home'), whileActive: true })],
+  ['record', 's.rt.pOnAir', () => (osName === 'macos'
+    ? { name: t('s.rn.nOnAir'), when: 'process-running', match: 'zoom.us|Microsoft Teams|FaceTime', then: 'push', key: 'onair', pushValue: t('s.rn.nOnAir'), whileActive: true }
+    : { name: t('s.rn.nOnAir'), when: 'mic-in-use', then: 'notify', text: t('s.rn.tMic'), level: 'warn', whileActive: false })],
+  ['calendar-days', 's.rt.pMeeting', () => ({ name: t('s.rn.nMeeting'), when: 'calendar-event', then: 'push', key: 'onair', pushValue: '{detail}', whileActive: true })],
+  ['flame', 's.rt.pCpu', () => ({ name: t('s.rn.nCpu'), when: 'cpu-above', value: 90, then: 'notify', text: t('s.rn.tCpu'), level: 'warn', whileActive: false })],
+  ['moon', 's.rt.pAway', () => ({ name: t('s.rn.nAway'), when: 'idle', value: 10, then: 'goto', page: pageId('ambient', 'clock', 'calm'), whileActive: true })],
+  ['clock', 's.rt.pEvening', () => ({ name: t('s.rn.nEvening'), when: 'time', match: '22:00-07:00', then: 'goto', page: pageId('calm', 'clock', 'ambient'), whileActive: true })],
+  ['bell', 's.rt.pDoorbell', () => ({ name: t('s.rn.nDoorbell'), when: 'push', match: 'doorbell', then: 'notify', text: t('s.rn.tDoor'), level: 'warn', whileActive: false })],
+  ['target', 's.rt.pQuota', () => ({ name: t('s.rn.nQuota'), when: 'quota-above', value: 80, then: 'notify', text: '{detail}', level: 'warn', whileActive: false, cooldownMin: 60 })],
+  ['eye', 's.rt.pReview', () => ({ name: t('s.rn.nReview'), when: 'review-requested', then: 'goto', page: pageId('work', 'devops'), whileActive: false, priority: 2, cooldownMin: 30, days: 'mon,tue,wed,thu,fri', during: '09:00-18:00' })],
+  ['x-circle', 's.rt.pCi', () => ({ name: t('s.rn.nCi'), when: 'ci-failed', then: 'notify', text: '{detail}', level: 'error', whileActive: false })],
+  ['sunrise', 's.rt.pMorning', () => ({ name: t('s.rn.nMorning'), when: 'always', during: '08:30-09:30', days: 'mon,tue,wed,thu,fri', then: 'goto', page: pageId('daily', 'home'), whileActive: true, priority: 2 })],
+  ['battery-low', 's.rt.pBattery', () => ({ name: t('s.rn.nBattery'), when: 'battery-low', value: 15, then: 'notify', text: t('s.rn.tBattery'), level: 'warn', whileActive: false, cooldownMin: 240 })],
+  ['thermometer', 's.rt.pWarm', () => ({ name: t('s.rn.nWarm'), when: 'push', match: 'temperature', op: '>', arg: '28', then: 'notify', text: t('s.rn.tWarm'), level: 'warn', whileActive: false, cooldownMin: 60 })],
+  ['plus', 's.rt.pEmpty', () => ({ name: '', when: 'session-waiting', then: 'goto', page: pageId('home'), whileActive: true })],
 ];
 let activeRules = [];
 
@@ -1826,7 +1856,7 @@ function renderRules() {
   $('rulePresets').replaceChildren(...RULE_PRESETS.map(([glyph, label, make]) => h('button', { class: 'btn', onclick: () => {
     cfg.rules.push({ id: '', enabled: true, ...make() });
     renderRules(); changed();
-  } }, icon(glyph, 'm'), label)));
+  } }, icon(glyph, 'm'), L(label))));
   const list = $('ruleList');
   if (!cfg.rules.length) { list.replaceChildren(h('p', { class: 'hint' }, t('s.r.noRules'))); return; }
   list.replaceChildren(...cfg.rules.map((r, i) => ruleCard(r, i)));
@@ -1836,21 +1866,21 @@ function ruleCard(r, i) {
   const set = (k, v, rerender = false) => { r[k] = v; changed(); if (rerender) renderRules(); };
   const trig = TRIGGERS[r.when] || TRIGGERS['session-waiting'];
   const sel = (value, options, onchange) => h('select', { onchange: (e) => onchange(e.target.value) },
-    ...Object.entries(options).map(([k, v]) => h('option', { value: k, selected: k === value }, typeof v === 'string' ? v : v.label)));
+    ...Object.entries(options).map(([k, v]) => h('option', { value: k, selected: k === value }, L(typeof v === 'string' ? v : v.label))));
   const text = (key, placeholder, cls = '') => h('input', { type: 'text', class: cls, value: r[key] ?? '', placeholder, oninput: (e) => set(key, e.target.value || null) });
 
   const cond = [];
-  if (trig.match) cond.push(text('match', trig.match, 'grow'));
-  if (r.when === 'push') cond.push(sel(r.op || 'on', { on: 'is on', '>': 'is above', '<': 'is below', '=': 'equals', '!=': 'is not' }, (v) => set('op', v === 'on' ? null : v, true)),
-    r.op ? text('arg', 'value', '') : null);
-  if (trig.value) cond.push(h('input', { type: 'number', min: 0, style: 'width:90px', value: r.value ?? trig.def, oninput: (e) => set('value', e.target.value === '' ? null : +e.target.value) }), h('span', { class: 'hint' }, trig.value));
+  if (trig.match) cond.push(text('match', L(trig.match), 'grow'));
+  if (r.when === 'push') cond.push(sel(r.op || 'on', { on: t('s.rt.opOn'), '>': t('s.rt.opAbove'), '<': t('s.rt.opBelow'), '=': t('s.rt.opEq'), '!=': t('s.rt.opNot') }, (v) => set('op', v === 'on' ? null : v, true)),
+    r.op ? text('arg', t('s.rt.value'), '') : null);
+  if (trig.value) cond.push(h('input', { type: 'number', min: 0, style: 'width:90px', value: r.value ?? trig.def, oninput: (e) => set('value', e.target.value === '' ? null : +e.target.value) }), h('span', { class: 'hint' }, L(trig.value)));
 
   const act = [];
   if (r.then === 'goto') act.push(h('select', { onchange: (e) => set('page', e.target.value) },
     ...(cfg.pages.some((p) => p.id === r.page) ? [] : [h('option', { value: r.page || '', selected: true }, t('s.r.pickPage'))]),
     ...cfg.pages.map((p) => h('option', { value: p.id, selected: p.id === r.page }, `${iconText(p.icon)} ${p.title}`.trim()))));
   if (r.then === 'notify') act.push(text('text', t('s.r.textPlaceholder'), 'grow'),
-    sel(r.level || 'info', { info: 'info', ok: 'ok', warn: 'warning', error: 'error' }, (v) => set('level', v)));
+    sel(r.level || 'info', { info: t('s.rt.lInfo'), ok: 'ok', warn: t('s.rt.lWarn'), error: t('s.rt.lError') }, (v) => set('level', v)));
   if (r.then === 'push') act.push(text('key', t('s.r.keyPlaceholder')), text('pushValue', t('s.r.valuePlaceholder'), 'grow'));
   if (r.then === 'shortcut') act.push(h('select', { onchange: (e) => set('shortcut', e.target.value || null) }, h('option', { value: '' }, t('s.r.pickShortcut')),
     ...(cfg.shortcuts || []).map((s) => h('option', { value: s.id, selected: s.id === r.shortcut }, `${iconText(s.icon)} ${s.label}`.trim()))));
@@ -1863,27 +1893,27 @@ function ruleCard(r, i) {
       const cur = days.length ? days : DAYS.map(([x]) => x);
       const next = cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d];
       set('days', next.length === 7 || !next.length ? null : DAYS.map(([x]) => x).filter((x) => next.includes(x)).join(','), true);
-    } }, l)));
+    } }, L(l))));
   const opts = h('details', { class: 'ropts', open: !!(r.days || r.during || r.forSec || r.cooldownMin || (r.priority ?? 5) !== 5 || r.countdownSec != null) },
     h('summary', {}, t('s.r.options'), h('span', { class: 'hint' }, ' ' + ruleSummary(r))),
     h('div', { class: 'line' }, h('b', {}, t('s.r.only')), dayBtns, h('span', { class: 'hint' }, t('s.r.between')), text('during', t('s.r.allDay'))),
-    h('div', { class: 'line' }, h('b', {}, t('s.r.wait')), h('span', { class: 'hint' }, t('s.r.actWhenLasts')), num('forSec', 0, 3600), h('span', { class: 'hint' }, 's · then rest'), num('cooldownMin', 0, 1440),
+    h('div', { class: 'line' }, h('b', {}, t('s.r.wait')), h('span', { class: 'hint' }, t('s.r.actWhenLasts')), num('forSec', 0, 3600), h('span', { class: 'hint' }, t('s.rt.thenRest')), num('cooldownMin', 0, 1440),
       h('span', { class: 'hint' }, t('s.r.minBeforeAgain'))),
     r.then === 'goto' ? h('div', { class: 'line' }, h('b', {}, t('s.r.page')), h('span', { class: 'hint' }, t('s.r.priority')),
       sel(String(r.priority ?? 5), PRIORITIES[r.priority ?? 5] ? PRIORITIES : { ...PRIORITIES, [r.priority]: String(r.priority) }, (v) => set('priority', +v)),
-      h('span', { class: 'hint' }, '· ' + t('s.r.countdown')), num('countdownSec', 0, 30, 56), h('span', { class: 'hint' }, `s (empty = ${cfg.display.switchCountdownSec ?? 3} s, as in General)`)) : null);
+      h('span', { class: 'hint' }, '· ' + t('s.r.countdown')), num('countdownSec', 0, 30, 56), h('span', { class: 'hint' }, t('s.rt.cdHint', { n: cfg.display.switchCountdownSec ?? 3 }))) : null);
 
   const live = activeRules.includes(r.id);
   return h('div', { class: 'card rule' + (r.enabled === false ? ' off' : '') },
     h('div', { class: 'line' },
-      h('label', { class: 'switch', title: 'Enabled' }, h('input', { type: 'checkbox', checked: r.enabled !== false, onchange: (e) => set('enabled', e.target.checked, true) }), h('span')),
+      h('label', { class: 'switch', title: t('s.cd.enabled') }, h('input', { type: 'checkbox', checked: r.enabled !== false, onchange: (e) => set('enabled', e.target.checked, true) }), h('span')),
       h('input', { type: 'text', class: 'grow', value: r.name || '', placeholder: t('s.r.namePlaceholder'), oninput: (e) => set('name', e.target.value) }),
-      live ? h('span', { class: 'live' }, '● active now') : null,
+      live ? h('span', { class: 'live' }, t('s.u.activeNow')) : null,
       h('button', { class: 'btn sm', title: t('s.r.runOnce'), onclick: async () => {
         const res = await fetch('/api/rules/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(r) });
         toast(res.ok ? t('s.r.done') : t('s.js.couldNotRun'), !res.ok);
-      } }, 'Test'),
-      h('button', { class: 'btn sm danger', onclick: () => { cfg.rules.splice(i, 1); renderRules(); changed(); } }, 'Delete')),
+      } }, t('s.test')),
+      h('button', { class: 'btn sm danger', onclick: () => { cfg.rules.splice(i, 1); renderRules(); changed(); } }, t('s.u.delete'))),
     h('div', { class: 'line' }, h('b', {}, t('s.r.when')), sel(r.when, TRIGGERS, (v) => { r.match = null; r.value = null; set('when', v, true); }), ...cond),
     h('div', { class: 'line' }, h('b', {}, t('s.r.then')), sel(r.then, ACTIONS, (v) => { if (v === 'goto' && !cfg.pages.some((p) => p.id === r.page)) r.page = cfg.pages[0]?.id || null; set('then', v, true); }), ...act),
     r.then !== 'notify' ? h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: r.whileActive !== false, onchange: (e) => set('whileActive', e.target.checked) }),
@@ -1893,13 +1923,13 @@ function ruleCard(r, i) {
 
 function ruleSummary(r) {
   const parts = [];
-  if (r.days) parts.push(r.days.split(',').map((d) => d[0].toUpperCase() + d.slice(1, 2)).join(' '));
+  if (r.days) parts.push(r.days.split(',').map((d) => L(DAYS.find(([x]) => x === d)?.[1]) || d).join(' '));
   if (r.during) parts.push(r.during);
-  if (r.forSec) parts.push(`after ${r.forSec} s`);
-  if (r.cooldownMin) parts.push(`rest ${r.cooldownMin} min`);
-  if (r.then === 'goto' && (r.priority ?? 5) !== 5) parts.push(`${PRIORITIES[r.priority] || r.priority} priority`);
-  if (r.then === 'goto' && r.countdownSec != null) parts.push(r.countdownSec ? `${r.countdownSec} s countdown` : 'no countdown');
-  return parts.length ? '· ' + parts.join(' · ') : '· every day, at once';
+  if (r.forSec) parts.push(t('s.rt.sAfter', { n: r.forSec }));
+  if (r.cooldownMin) parts.push(t('s.rt.sRest', { n: r.cooldownMin }));
+  if (r.then === 'goto' && (r.priority ?? 5) !== 5) parts.push(t('s.rt.sPriority', { p: L(PRIORITIES[r.priority]) || r.priority }));
+  if (r.then === 'goto' && r.countdownSec != null) parts.push(r.countdownSec ? t('s.rt.sCountdown', { n: r.countdownSec }) : t('s.rt.sNoCountdown'));
+  return parts.length ? '· ' + parts.join(' · ') : '· ' + t('s.rt.sEveryDay');
 }
 
 // shows which rules hold right now while the Rules section is open
@@ -1910,8 +1940,8 @@ async function pollRules() {
     const next = s.rules || [];
     rulesPausedUntil = s.rulesPaused || null;
     $('rulesPauseBtn').textContent = rulesPausedUntil ? t('s.r.resumeRules') : t('s.rules.pause1h');
-    $('rulesPausedState').textContent = rulesPausedUntil ? `Rules are paused until ${new Date(rulesPausedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`
-      : 'Page switches count down on the phone and wait while you use it (General › Page switching).';
+    $('rulesPausedState').textContent = rulesPausedUntil ? t('s.rt.pausedUntil', { time: new Date(rulesPausedUntil).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
+      : t('s.g.rulesIdle');
     if (next.join() !== activeRules.join()) { activeRules = next; if (!document.activeElement?.closest?.('#ruleList')) renderRules(); }
   } catch (_) {}
 }
@@ -1934,7 +1964,7 @@ async function chargeTest(action) {
   if (JSON.stringify(cfg) !== saved) { toast(t('s.js.saveThenTest'), true); return; }
   const r = await fetch(`/api/charge/test?action=${action}`, { method: 'POST' });
   const j = await r.json().catch(() => ({}));
-  toast(r.ok ? `Power ${action}` : j.error || 'Could not switch', !r.ok);
+  toast(r.ok ? t(action === 'on' ? 's.ch.powerOn' : 's.ch.powerOff') : j.error || t('s.ch.fail'), !r.ok);
   pollCharge();
 }
 async function pollCharge() {
@@ -1944,9 +1974,9 @@ async function pollCharge() {
     const p = s.phone;
     const age = p ? Math.round((Date.now() - p.at) / 1000) : null;
     $('chargeState').replaceChildren(...(p
-      ? [`Phone: ${p.level}% `, ...(p.plugged ? [icon('bolt', 'm'), 'charging'] : ['on battery']), ` (${age < 90 ? 'just now' : Math.round(age / 60) + ' min ago'})`]
-      : ['No report from the phone yet']),
-      s.power ? ` · power ${s.power}` : '', s.error ? ` · ${s.error}` : '');
+      ? [t('s.ch.phone', { n: p.level }) + ' ', ...(p.plugged ? [icon('bolt', 'm'), t('s.ch.charging')] : [t('s.ch.onBattery')]), ` (${age < 90 ? t('s.ch.justNow') : t('s.ch.minAgo', { n: Math.round(age / 60) })})`]
+      : [t('s.ch.noReport')]),
+      s.power ? ' · ' + t('s.ch.power', { state: s.power }) : '', s.error ? ` · ${s.error}` : '');
   } catch (_) {}
 }
 setInterval(pollCharge, 5000);
@@ -1957,25 +1987,24 @@ function renderWebhooks(lan) {
   const host = lan?.active && lan.hosts?.length ? `https://${lan.hosts[0]}:${lan.port}` : null;
   const token = cfg.lan?.webhookToken || '';
   const ex = [
-    ['A number', `curl -X POST ${local}/api/push/temperature -d 21.5`],
-    ['A status with a subtitle', `curl -X POST ${local}/api/push/build -H "Content-Type: application/json" -d "{\\"value\\":\\"passed\\",\\"sub\\":\\"main · 3m 12s\\"}"`],
-    ['A list (style: list)', `curl -X POST ${local}/api/push/todo -H "Content-Type: application/json" -d "[\\"Ship 0.6.2\\",\\"Buy milk\\"]"`],
-    ['Expires after 10 minutes', `curl -X POST "${local}/api/push/door?ttl=600" -d open`],
-    ['Notification on the phone', `curl -X POST ${local}/api/notify -H "Content-Type: application/json" -d "{\\"title\\":\\"Deploy\\",\\"text\\":\\"Production is live\\",\\"level\\":\\"ok\\"}"`],
-    ['Switch the phone to a page', `curl -X POST ${local}/api/goto/music`],
-    ['Refresh everything now', `curl -X POST ${local}/api/refresh`],
+    [t('s.u.exNumber'), `curl -X POST ${local}/api/push/temperature -d 21.5`],
+    [t('s.u.exStatus'), `curl -X POST ${local}/api/push/build -H "Content-Type: application/json" -d "{\\"value\\":\\"passed\\",\\"sub\\":\\"main · 3m 12s\\"}"`],
+    [t('s.u.exList'), `curl -X POST ${local}/api/push/todo -H "Content-Type: application/json" -d "[\\"Ship 0.6.2\\",\\"Buy milk\\"]"`],
+    [t('s.u.exExpires'), `curl -X POST "${local}/api/push/door?ttl=600" -d open`],
+    [t('s.u.exNotify'), `curl -X POST ${local}/api/notify -H "Content-Type: application/json" -d "{\\"title\\":\\"Deploy\\",\\"text\\":\\"Production is live\\",\\"level\\":\\"ok\\"}"`],
+    [t('s.u.exGoto'), `curl -X POST ${local}/api/goto/music`],
+    [t('s.u.exRefresh'), `curl -X POST ${local}/api/refresh`],
     ['PowerShell', `Invoke-RestMethod -Method Post ${local}/api/push/cpu-fan -Body 1450`],
   ];
-  $('whExamples').replaceChildren(...ex.map(([t, c]) => h('div', { class: 'ex' }, h('span', {}, t), h('code', { class: 'cmdline', title: 'Click to copy', onclick: () => { navigator.clipboard?.writeText(c); toast('Copied'); } }, c))));
+  $('whExamples').replaceChildren(...ex.map(([label, c]) => h('div', { class: 'ex' }, h('span', {}, label), h('code', { class: 'cmdline', title: t('s.u.clickCopy'), onclick: () => { navigator.clipboard?.writeText(c); toast(t('s.u.copied')); } }, c))));
   $('whLan').replaceChildren(host
-    ? h('div', {}, h('p', { class: 'hint', style: { marginTop: 0 } }, 'From other machines on your network or Tailscale, with the webhook key (HTTPS with this PC\'s self-signed certificate, so curl needs -k). ' +
-        'The key can also go in ?token= for senders that cannot set headers. It only opens the webhook endpoints, never the phone API; replace it if it leaks.'),
-      h('div', { class: 'row', style: { gap: '8px', margin: '0 0 8px' } }, h('code', {}, token ? token.slice(0, 6) + '…' : '(generated on save)'),
+    ? h('div', {}, h('p', { class: 'hint', style: { marginTop: 0 } }, t('s.u.whLanHint')),
+      h('div', { class: 'row', style: { gap: '8px', margin: '0 0 8px' } }, h('code', {}, token ? token.slice(0, 6) + '…' : t('s.u.genOnSave')),
         h('button', { class: 'btn sm', disabled: !token, onclick: () => { navigator.clipboard?.writeText(token); toast(t('s.js.webhookKeyCopied')); } }, t('s.wh.copyKey')),
         h('button', { class: 'btn sm', onclick: () => { cfg.lan = { ...(cfg.lan || {}), webhookToken: '' }; changed(); toast(t('s.js.webhookKeyOnSave')); } }, t('s.k.newKey'))),
-      h('code', { class: 'cmdline', onclick: () => { navigator.clipboard?.writeText(`curl -k -X POST ${host}/api/push/temperature -H "Authorization: Bearer ${token}" -d 21.5`); toast('Copied'); } },
+      h('code', { class: 'cmdline', onclick: () => { navigator.clipboard?.writeText(`curl -k -X POST ${host}/api/push/temperature -H "Authorization: Bearer ${token}" -d 21.5`); toast(t('s.u.copied')); } },
         `curl -k -X POST ${host}/api/push/temperature -H "Authorization: Bearer ${token.slice(0, 6)}…" -d 21.5`))
-    : h('p', { class: 'hint', style: { margin: 0 } }, 'Turn on "Wi-Fi & Tailscale" in General to accept webhooks from other machines too. From this PC no token is needed.'));
+    : h('p', { class: 'hint', style: { margin: 0 } }, t('s.u.whLocalOnly')));
 }
 
 async function loadPushed() {
@@ -1985,8 +2014,8 @@ async function loadPushed() {
     const items = Object.entries(r.items || {}).sort((a, b) => b[1].at - a[1].at);
     $('whItems').replaceChildren(...(items.length ? items.map(([k, v]) => h('tr', {},
       h('td', {}, h('code', {}, k)), h('td', { class: 'val' }, JSON.stringify(v.data)), h('td', { class: 'hint' }, new Date(v.at).toLocaleString()),
-      h('td', {}, h('button', { class: 'btn sm danger', onclick: async () => { await fetch('/api/push/' + encodeURIComponent(k), { method: 'DELETE' }); loadPushed(); } }, 'Delete'))))
-      : [h('tr', {}, h('td', { colspan: 4, class: 'hint' }, 'Nothing pushed yet.'))]));
+      h('td', {}, h('button', { class: 'btn sm danger', onclick: async () => { await fetch('/api/push/' + encodeURIComponent(k), { method: 'DELETE' }); loadPushed(); } }, t('s.u.delete')))))
+      : [h('tr', {}, h('td', { colspan: 4, class: 'hint' }, t('s.u.nothingPushed')))]));
   } catch (_) {}
 }
 
@@ -2025,12 +2054,12 @@ function renderDeck() {
     dragSort(k, cfg.shortcuts, (from, to) => { selKey = to; renderDeck(); changed(); });
     deck.append(k);
   });
-  deck.append(h('div', { class: 'key add', onclick: addShortcut }, h('span', { class: 'ki' }, icon('plus')), h('span', { class: 'kl' }, 'New shortcut')));
+  deck.append(h('div', { class: 'key add', onclick: addShortcut }, h('span', { class: 'ki' }, icon('plus')), h('span', { class: 'kl' }, t('s.u.newShortcut'))));
   renderEditor();
 }
 
 function addShortcut() {
-  cfg.shortcuts.push({ id: '', label: 'New shortcut', icon: 'icon:star', color: '#0ea5e9', cmd: '' });
+  cfg.shortcuts.push({ id: '', label: t('s.u.newShortcut'), icon: 'icon:star', color: '#0ea5e9', cmd: '' });
   selKey = cfg.shortcuts.length - 1;
   renderDeck();
   changed();
@@ -2041,7 +2070,7 @@ function renderEditor() {
   const ed = $('editor');
   ed.textContent = '';
   const s = cfg.shortcuts[selKey];
-  if (!s) { ed.append(h('p', { class: 'lead', style: { margin: 0 } }, 'No shortcuts yet. Add one with "New shortcut".')); return; }
+  if (!s) { ed.append(h('p', { class: 'lead', style: { margin: 0 } }, t('s.u.noShortcuts'))); return; }
 
   const upd = (key, val, rerender = true) => { s[key] = val; if (rerender) renderDeckKeysOnly(); changed(); };
   const text = (key, label, ph = '', hint = '') => h('div', { class: 'field' }, h('label', {}, label),
@@ -2056,7 +2085,7 @@ function renderEditor() {
   markSwatch();
   const cmdIn = h('input', { type: 'text', value: s.cmd || '', placeholder: 'e.g. wt.exe, https://…, builtin:lock', oninput: (e) => upd('cmd', e.target.value, false) });
   const preset = h('select', { onchange: (e) => { if (e.target.value) { cmdIn.value = e.target.value; upd('cmd', e.target.value, false); cmdIn.focus(); } e.target.value = ''; } },
-    ...presets().map(([v, l]) => h('option', { value: v }, l)));
+    ...presets().map(([v, l]) => h('option', { value: v }, L(l))));
 
   ed.append(
     h('div', { class: 'row', style: { justifyContent: 'space-between', marginBottom: '12px' } },
@@ -2064,8 +2093,8 @@ function renderEditor() {
       h('div', { class: 'row', style: { gap: '6px' } },
         h('button', { class: 'btn sm', onclick: () => moveKey(-1), disabled: selKey === 0 }, t('s.js.earlier')),
         h('button', { class: 'btn sm', onclick: () => moveKey(1), disabled: selKey === cfg.shortcuts.length - 1 }, t('s.js.later')),
-        h('button', { class: 'btn sm', onclick: testKey }, icon('play', 'm'), 'Test'),
-        h('button', { class: 'btn sm danger', onclick: delKey }, 'Delete'))),
+        h('button', { class: 'btn sm', onclick: testKey }, icon('play', 'm'), t('s.test')),
+        h('button', { class: 'btn sm danger', onclick: delKey }, t('s.u.delete')))),
     h('div', { class: 'grid2' },
       h('div', {},
         text('label', t('s.k.label'), t('s.k.labelHint')),
@@ -2079,8 +2108,8 @@ function renderEditor() {
 // A custom icon image (PNG, WEBP or SVG) overrides both the emoji and the auto-detected program icon on the phone.
 // Needs a saved shortcut id, so a brand new one must be saved once before it can be uploaded.
 function customIconField(s) {
-  if (!s.id) return h('div', { class: 'field' }, h('label', {}, 'Custom icon image'),
-    h('span', { class: 'hint' }, 'Save once to upload a custom icon image here.'));
+  if (!s.id) return h('div', { class: 'field' }, h('label', {}, t('s.u.customIcon')),
+    h('span', { class: 'hint' }, t('s.u.customIconSaveFirst')));
 
   const preview = h('img', { class: 'custom-icon-preview', alt: '', onerror: () => (preview.style.visibility = 'hidden'), onload: () => (preview.style.visibility = 'visible') });
   // fetch(), not <img src>: an <img> whose request 404s (most shortcuts have no icon at all) logs a console error;
@@ -2115,14 +2144,14 @@ function customIconField(s) {
         const j = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(j.error || 'Upload failed');
         if (j.version) cfgVersion = j.version;
-        toast('Icon uploaded.');
+        toast(t('s.u.iconUploaded'));
       } catch (err) { toast(err.message, true); }
       refresh();
     } });
-  return h('div', { class: 'field' }, h('label', {}, 'Custom icon image'),
+  return h('div', { class: 'field' }, h('label', {}, t('s.u.customIcon')),
     h('div', { class: 'row', style: { alignItems: 'center', gap: '8px' } },
       preview, file,
-      h('button', { class: 'btn sm', type: 'button', onclick: () => file.click() }, 'Upload…'),
+      h('button', { class: 'btn sm', type: 'button', onclick: () => file.click() }, t('s.u.upload')),
       h('button', { class: 'btn sm', type: 'button', onclick: async () => {
         try {
           const headers = {};
@@ -2131,11 +2160,11 @@ function customIconField(s) {
           const j = await res.json().catch(() => ({}));
           if (!res.ok) throw new Error(j.error || 'Remove failed');
           if (j.version) cfgVersion = j.version;
-          toast('Custom icon removed.');
+          toast(t('s.u.iconRemoved'));
         } catch (err) { toast(err.message, true); }
         refresh();
-      } }, 'Remove')),
-    h('span', { class: 'hint' }, 'PNG, WEBP or SVG, 512 KB max. Overrides the emoji (and the app’s own icon) on the phone.'));
+      } }, t('s.js.remove'))),
+    h('span', { class: 'hint' }, t('s.u.customIconHint')));
 }
 
 // What a key does: run a program, press keys, type text or run a macro; plus the on / off (toggle) options.
@@ -2155,7 +2184,7 @@ function actionFields(s, upd, text, cmdIn, preset) {
   if (kind === 'run') {
     fields.push(
       h('div', { class: 'field' }, h('label', {}, t('s.k.command')), cmdIn, preset,
-        h('span', { class: 'hint' }, osName === 'windows' ? 'Program, address or built-in command. Anything the Windows Run dialog accepts works.' : 'Program, address or built-in command.')),
+        h('span', { class: 'hint' }, osName === 'windows' ? t('s.u.runHintWin') : t('s.u.runHint'))),
       text('args', t('s.k.arguments'), osName === 'windows' ? 'e.g. -d D:\\Projects claude' : 'e.g. --new-window ~/Projects'),
       text('cwd', t('s.k.workingFolder'), t('s.k.optional')));
   } else if (kind === 'keys') {
@@ -2167,13 +2196,13 @@ function actionFields(s, upd, text, cmdIn, preset) {
       area((s.steps || []).join('\n'), 'keys:ctrl+c\nwait:200\ntext:Hello\nshortcut:terminal', 6, (e) => upd('steps', e.target.value.split('\n').map((x) => x.trim()).filter(Boolean), false)),
       h('span', { class: 'hint' }, 'keys:… presses keys, text:… types, wait:300 waits (milliseconds), shortcut:id runs another shortcut.')));
   }
-  if (osName === 'macos' && kind !== 'run') fields.push(h('p', { class: 'hint' }, 'macOS asks once to allow PhoneBoxAgent in System Settings › Privacy & Security › Accessibility.'));
-  if (osName === 'linux' && kind !== 'run') fields.push(h('p', { class: 'hint' }, 'Needs xdotool (X11) or wtype (Wayland).'));
+  if (osName === 'macos' && kind !== 'run') fields.push(h('p', { class: 'hint' }, t('s.u.macAccess')));
+  if (osName === 'linux' && kind !== 'run') fields.push(h('p', { class: 'hint' }, t('s.u.linuxKeys')));
 
   const isMute = s.cmd === 'builtin:mute';
   fields.push(h('label', { class: 'check', style: { marginTop: '4px' } },
     h('input', { type: 'checkbox', checked: !!s.toggle || isMute, disabled: isMute, onchange: (e) => { s.toggle = e.target.checked; changed(); renderEditor(); } }),
-    isMute ? 'On / off key (shows whether the sound is muted)' : 'On / off key: the phone shows its state'));
+    isMute ? t('s.u.toggleMute') : t('s.u.toggle')));
   if (s.toggle && !isMute) {
     fields.push(text('stateKey', 'State from a pushed value (optional)', 'e.g. teams-muted',
       'A value pushed to /api/push/<key> (true / on / 1 = on). Without it the phone shows the state after each tap.'));
@@ -2231,16 +2260,16 @@ function renderControlSettings() {
   root.replaceChildren(h('h3',{},'Control Deck'),h('p',{class:'hint'},t('s.cd.lead')));
   root.append(field(t('s.cd.audio'),c,'allowListening','checkbox'),field(t('s.cd.power'),c,'allowPower','checkbox'),field(t('s.cd.radioLogos'),c,'allowOnlineRadioLogos','checkbox'));
   const spotify=h('details',{},h('summary',{},t('s.cd.spotifyConn')));
-  const auth=h('p',{class:'hint'},'Register the redirect address in your Spotify Developer app. A Client ID is sufficient; no client secret is used.');
+  const auth=h('p',{class:'hint'},t('s.c.spotifyHint'));
   spotify.append(field(t('s.cd.clientId'),c,'spotifyClientId'),field(t('s.cd.deviceId'),c,'spotifyDevice'),auth,
     btn(t('s.cd.connect'),async()=>{
       if(!await save())return; const j=await request('spotify/connect','GET');
-      const live=$('controlSettings');const result=h('p',{},'Register redirect address: '+j.redirectUri,h('br'),h('a',{href:j.url,target:'_blank',rel:'noopener'},'Continue to Spotify sign-in'));live.prepend(result);
+      const live=$('controlSettings');const result=h('p',{},t('s.c.redirect')+' '+j.redirectUri,h('br'),h('a',{href:j.url,target:'_blank',rel:'noopener'},t('s.c.toSpotify')));live.prepend(result);
     }),btn(t('s.cd.checkConn'),async()=>{const j=await request('spotify/state','GET');auth.textContent=j.connected?t('s.cd.connected'):j.error || t('s.cd.notConnected');}),
     btn(t('s.cd.disconnect'),async()=>{await request('spotify/disconnect');auth.textContent=t('s.cd.disconnected');}));
   root.append(spotify);
   const integration=h('details',{},h('summary',{},t('s.cd.audioInt')),field(t('s.cd.mixerExe'),c,'mixerExecutable'),field(t('s.cd.mixerDll'),c,'mixerLibrary'));root.append(integration);
-  const hints={shortcut:'Target: existing shortcut ID.',app:'Target: application shortcut ID.',macro:'Target: macro shortcut ID.',snippet:'Target: text shortcut ID.',meeting:'Target: meeting shortcut ID.',discord:'Target: Discord shortcut ID.',focus:'Target: work/focus macro shortcut ID.',project:'Target: folder/project shortcut ID.',keys:'Target: chord, e.g. Ctrl+Shift+M.',text:'Target: text to type.',task:'Target: executable shortcut ID. Output remains on the computer.',server:'Target: executable shortcut ID. Stop affects only the process started by this control.',sound:'Target: full sound file path. Device: output ID. Value: volume 0–100.',radio:'Target: direct HTTP(S) stream or Windows-only HLS (.m3u8) URL. Device: output ID. Value: volume 0–100.',playlist:'Target: spotify:playlist:… (also album, track or episode).',midi:'Target: hex MIDI bytes, e.g. B0 07 {value}. Device: numeric output port. Value: 0–127.',osc:'Target: OSC address, e.g. /volume. Device: host:port. Value: whole number (sent as an OSC float).',service:'Target: Windows service name. Argument: start, stop, restart.',workflow:'Target: owner/repo. Argument: workflow filename. Device: optional branch/ref.','window-layout':'Target: process name. Argument: left, right, center, max.','display-profile':'Target: monitor ID. Argument: JSON with width, height, hz, optional x/y.','audio-route':'Target: process.exe. Device: output ID. Requires SoundVolumeView.',mixer:'Target: Strip[0].Gain or Bus[0].Gain. Value: −60 to 12 dB.','mixer-mute':'Target: Strip[0].Mute (or supported toggle). Value: 0 or 1.',presentation:'Target: POWERPNT or soffice. Argument: start, next, prev, end, blank.'};
+  const hints={shortcut:t('s.c.hShortcut'),app:t('s.c.hApp'),macro:t('s.c.hMacro'),snippet:t('s.c.hSnippet'),meeting:t('s.c.hMeeting'),discord:t('s.c.hDiscord'),focus:t('s.c.hFocus'),project:t('s.c.hProject'),keys:t('s.c.hKeys'),text:t('s.c.hText'),task:t('s.c.hTask'),server:t('s.c.hServer'),sound:t('s.c.hSound'),radio:t('s.c.hRadio'),playlist:t('s.c.hPlaylist'),midi:t('s.c.hMidi'),osc:t('s.c.hOsc'),service:t('s.c.hService'),workflow:t('s.c.hWorkflow'),'window-layout':t('s.c.hWindowLayout'),'display-profile':t('s.c.hDisplayProfile'),'audio-route':t('s.c.hAudioRoute'),mixer:t('s.c.hMixer'),'mixer-mute':t('s.c.hMixerMute'),presentation:t('s.c.hPresentation')};
   const stationFilter = h('input', { type: 'search', placeholder: t('s.cd.filterStations'), style: { marginBottom: '6px' } });
   const stationList = h('div', { class: 'stack-list' });
   const radioDetails = h('details', {}, h('summary', {}, t('s.cd.stations')),
@@ -2307,7 +2336,7 @@ function renderControlSettings() {
           type: 'checkbox',
           class: 'stack-row-check',
           checked: isEnabled,
-          title: isEnabled ? 'Enabled' : 'Disabled',
+          title: isEnabled ? t('s.cd.enabled') : t('s.u.disabled'),
           onchange: (e) => {
             e.stopPropagation();
             station.enabled = e.target.checked;
@@ -2319,8 +2348,8 @@ function renderControlSettings() {
         h('span', { class: 'stack-row-ico' }, icon('radio')),
         h('span', { class: 'stack-row-name', title: station.target || '' }, station.label || station.id),
         h('div', { class: 'stack-row-actions' },
-          h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move up', disabled: !!q || idx === 0, onclick: (e) => { e.stopPropagation(); moveRadio(idx, idx - 1); } }, '▲'),
-          h('button', { type: 'button', class: 'stack-btn-sm', title: 'Move down', disabled: !!q || idx === radios.length - 1, onclick: (e) => { e.stopPropagation(); moveRadio(idx, idx + 1); } }, '▼')
+          h('button', { type: 'button', class: 'stack-btn-sm', title: t('s.u.moveUp'), disabled: !!q || idx === 0, onclick: (e) => { e.stopPropagation(); moveRadio(idx, idx - 1); } }, '▲'),
+          h('button', { type: 'button', class: 'stack-btn-sm', title: t('s.u.moveDown'), disabled: !!q || idx === radios.length - 1, onclick: (e) => { e.stopPropagation(); moveRadio(idx, idx + 1); } }, '▼')
         )
       );
       return row;
@@ -2341,7 +2370,7 @@ function renderControlSettings() {
       enField.querySelector('input').addEventListener('change', () => renderStations());
       const lblField = field(t('s.cd.controlLabel'), a, 'label');
       lblField.querySelector('input').addEventListener('change', () => renderStations());
-      box.append(enField, field(t('s.cd.controlId'), a, 'id'), lblField, h('label', {}, 'Kind'), kind, hint, field(t('s.cd.target'), a, 'target'), iconField, field(t('s.cd.argument'), a, 'argument'), field(t('s.cd.device'), a, 'device'), field(t('s.cd.value'), a, 'value', 'number'));
+      box.append(enField, field(t('s.cd.controlId'), a, 'id'), lblField, h('label', {}, t('s.u.kind')), kind, hint, field(t('s.cd.target'), a, 'target'), iconField, field(t('s.cd.argument'), a, 'argument'), field(t('s.cd.device'), a, 'device'), field(t('s.cd.value'), a, 'value', 'number'));
       const output = h('pre', { style: { maxHeight: '240px', overflow: 'auto', whiteSpace: 'pre-wrap' } });
       box.append(btn(t('s.cd.showOutput'), async () => { const r = await fetch('/api/controls/task-output/' + encodeURIComponent(a.id)); if (!r.ok) throw new Error(t('s.cd.outputUnavailable')); output.textContent = await r.text(); }), btn(t('s.cd.removeControl'), () => { c.actions = c.actions.filter((x) => x !== a); changed(); renderActions(); }), output);
       return box;
@@ -2349,17 +2378,17 @@ function renderControlSettings() {
     renderStations();
   };
   renderActions();
-  root.append(btn('Add control', () => { c.actions.push({ id: 'control-' + crypto.randomUUID().slice(0, 8), label: 'New control', kind: 'shortcut', target: '', value: 75, enabled: true }); changed(); renderActions(); actions.lastChild.open = true; }));
+  root.append(btn(t('s.c.addControl'), () => { c.actions.push({ id: 'control-' + crypto.randomUUID().slice(0, 8), label: t('s.c.newControl'), kind: 'shortcut', target: '', value: 75, enabled: true }); changed(); renderActions(); actions.lastChild.open = true; }));
 
-  const radioDir = h('details', {}, h('summary', {}, 'Import & verify radio stations (radio-browser.info)'));
-  const countrySelect = h('select', { 'aria-label': 'Country', style: { minWidth: '200px' } }, h('option', { value: '' }, 'Load countries first…'));
-  const limitInput = h('input', { type: 'number', min: 1, max: 100, value: 30, style: { width: '90px' }, 'aria-label': 'Station count' });
-  const dirStatus = h('p', { class: 'hint', style: { margin: '6px 0' } }, 'Import popular stations by country from the public radio-browser.info directory (CC0), or check configured radio stream URLs.');
+  const radioDir = h('details', {}, h('summary', {}, t('s.c.radioDir')));
+  const countrySelect = h('select', { 'aria-label': t('s.c.country'), style: { minWidth: '200px' } }, h('option', { value: '' }, t('s.c.loadFirst')));
+  const limitInput = h('input', { type: 'number', min: 1, max: 100, value: 30, style: { width: '90px' }, 'aria-label': t('s.c.stationCount') });
+  const dirStatus = h('p', { class: 'hint', style: { margin: '6px 0' } }, t('s.c.radioDirHint'));
   const checkReport = h('pre', { style: { maxHeight: '200px', overflow: 'auto', whiteSpace: 'pre-wrap' } });
   radioDir.append(
     dirStatus,
     h('div', { class: 'row', style: { gap: '8px', flexWrap: 'wrap', marginBottom: '8px' } },
-      btn('Load countries', async () => {
+      btn(t('s.c.loadCountries'), async () => {
         try {
           const res = await request('radio-directory/countries', 'GET');
           const list = res.countries || [];
@@ -2367,22 +2396,22 @@ function renderControlSettings() {
             h('option', { value: '' }, '— Select country —'),
             ...list.map((cty) => h('option', { value: cty.code }, `${cty.name} (${cty.stationCount})`))
           );
-          dirStatus.textContent = `Loaded ${list.length} countries.`;
+          dirStatus.textContent = t('s.c.loaded', { n: list.length });
         } catch (e) {
-          dirStatus.textContent = e.message || 'Could not load countries from radio-browser.info.';
+          dirStatus.textContent = e.message || t('s.c.loadFail');
           throw e;
         }
       }),
       countrySelect,
       limitInput,
-      btn('Import stations', async () => {
+      btn(t('s.c.importStations'), async () => {
         const cc = countrySelect.value;
         if (!cc) { toast(t('s.js.pickCountry'), true); return; }
         const MAX_ACTIONS = 512;
         c.actions ||= [];
         if (c.actions.length >= MAX_ACTIONS) {
-          dirStatus.textContent = `Control Deck is full (${MAX_ACTIONS} controls maximum). Remove unused controls before importing.`;
-          toast(`Control Deck is full (${MAX_ACTIONS} max)`, true);
+          dirStatus.textContent = t('s.c.full', { max: MAX_ACTIONS });
+          toast(t('s.c.fullShort', { max: MAX_ACTIONS }), true);
           return;
         }
         const limit = Math.max(1, Math.min(100, parseInt(limitInput.value || '30', 10)));
@@ -2405,57 +2434,57 @@ function renderControlSettings() {
             added++;
           }
           if (added > 0) { changed(); renderActions(); }
-          const msg = `Imported ${added} new station(s)`
-            + (skipped ? ` (${skipped} already present)` : '')
-            + (capped ? ` — stopped at ${MAX_ACTIONS}-control limit (${capped} omitted)` : '')
-            + '. Click Save to apply.';
+          const msg = t('s.c.imported', { n: added })
+            + (skipped ? ' ' + t('s.c.skipped', { n: skipped }) : '')
+            + (capped ? ' ' + t('s.c.capped', { max: MAX_ACTIONS, n: capped }) : '')
+            + ' ' + t('s.c.saveToApply');
           dirStatus.textContent = msg;
-          toast(capped ? `Imported ${added} stations (${MAX_ACTIONS} limit reached)` : `Imported ${added} station(s)`);
+          toast(capped ? t('s.c.importedCapped', { n: added, max: MAX_ACTIONS }) : t('s.c.imported', { n: added }));
         } catch (e) {
-          dirStatus.textContent = e.message || 'Could not import stations from radio-browser.info.';
+          dirStatus.textContent = e.message || t('s.c.importFail');
           throw e;
         }
       }),
-      btn('Check configured streams', async () => {
+      btn(t('s.c.checkStreams'), async () => {
         const radios = c.actions.filter((a) => a.kind === 'radio');
         if (!radios.length) { toast(t('s.js.noRadio'), true); return; }
-        dirStatus.textContent = `Checking ${radios.length} stream(s)…`;
+        dirStatus.textContent = t('s.c.checking', { n: radios.length });
         const r = await fetch('/api/controls/radio-directory/check', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ stations: radios.map((a) => ({ id: a.id, streamUrl: a.target })) })
         });
         const j = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(j.error || 'Stream check failed');
+        if (!r.ok) throw new Error(j.error || t('s.c.checkFail'));
         const results = j.results || [];
         const byId = new Map(results.map((x) => [x.id, x]));
         const okCount = results.filter((x) => x.ok).length;
-        dirStatus.textContent = `Checked ${results.length} stream(s): ${okCount} live, ${results.length - okCount} unreachable (no controls were modified).`;
+        dirStatus.textContent = t('s.c.checked', { n: results.length, ok: okCount, bad: results.length - okCount });
         checkReport.textContent = radios.map((a) => {
           const st = byId.get(a.id);
-          return `${st?.ok ? '✓' : '✗'} ${a.label || a.id} — ${st?.status || 'Unknown'} (${a.target})`;
+          return `${st?.ok ? '✓' : '✗'} ${a.label || a.id} — ${st?.status || t('s.c.unknown')} (${a.target})`;
         }).join('\n');
       })
     ),
     checkReport
   );
   root.append(radioDir);
-  root.append(h('details',{},h('summary',{},'Available shortcut IDs'),h('p',{class:'hint'},'Create executable, text and macro shortcuts in Deck first.'),...cfg.shortcuts.map(s=>h('div',{},s.id+' — '+s.label))));
-  const profiles=h('div');root.append(h('h4',{},'Audio and routine profiles'),profiles);
+  root.append(h('details',{},h('summary',{},t('s.c.shortcutIds')),h('p',{class:'hint'},t('s.c.shortcutIdsHint')),...cfg.shortcuts.map(s=>h('div',{},s.id+' — '+s.label))));
+  const profiles=h('div');root.append(h('h4',{},t('s.c.profiles')),profiles);
   const renderProfiles=()=>profiles.replaceChildren(...c.profiles.map(p=>{
     const box=h('details',{},h('summary',{},p.label || p.id));
-    box.append(field('Profile ID',p,'id'),field('Profile label',p,'label'),field('Override output device ID',p,'output'),field('Override microphone device ID',p,'input'));
-    const levels=h('details',{},h('summary',{},'Captured audio levels'));
-    for(const level of p.levels || []) levels.append(h('p',{class:'hint'},level.kind+': '+level.id),field('Volume',level,'volume','number'),field('Muted',level,'muted','checkbox'));
+    box.append(field(t('s.c.profileId'),p,'id'),field(t('s.c.profileLabel'),p,'label'),field(t('s.c.overrideOut'),p,'output'),field(t('s.c.overrideIn'),p,'input'));
+    const levels=h('details',{},h('summary',{},t('s.c.levels')));
+    for(const level of p.levels || []) levels.append(h('p',{class:'hint'},level.kind+': '+level.id),field(t('s.c.volume'),level,'volume','number'),field(t('s.c.muted'),level,'muted','checkbox'));
     box.append(levels);
-    const list=h('textarea',{'aria-label':'Profile action IDs',rows:3},(p.actions || []).join('\n'));
+    const list=h('textarea',{'aria-label':t('s.c.actionIds'),rows:3},(p.actions || []).join('\n'));
     list.onchange=()=>{p.actions=list.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);changed();};
-    box.append(h('label',{},'Control IDs to run in order'),list,h('p',{class:'hint'},(p.levels?.length || 0)+' captured levels. Explicit input/output overrides take precedence over captured audio roles.'),btn('Remove profile',()=>{c.profiles=c.profiles.filter(x=>x!==p);changed();renderProfiles();}));return box;
+    box.append(h('label',{},t('s.c.runOrder')),list,h('p',{class:'hint'},t('s.c.levelsHint', { n: p.levels?.length || 0 })),btn(t('s.c.removeProfile'),()=>{c.profiles=c.profiles.filter(x=>x!==p);changed();renderProfiles();}));return box;
   }));renderProfiles();
-  root.append(btn('Capture current audio profile',async()=>{c.profiles.push(await request('capture'));changed();renderProfiles();profiles.lastChild.open=true;}),btn('Add routine profile',()=>{c.profiles.push({id:'profile-'+crypto.randomUUID().slice(0,8),label:'New routine',levels:[],defaults:{},actions:[]});changed();renderProfiles();profiles.lastChild.open=true;}));
+  root.append(btn(t('s.c.capture'),async()=>{c.profiles.push(await request('capture'));changed();renderProfiles();profiles.lastChild.open=true;}),btn(t('s.c.addRoutine'),()=>{c.profiles.push({id:'profile-'+crypto.randomUUID().slice(0,8),label:t('s.c.newRoutine'),levels:[],defaults:{},actions:[]});changed();renderProfiles();profiles.lastChild.open=true;}));
   const hardware=h('pre',{style:{maxHeight:'240px',overflow:'auto',whiteSpace:'pre-wrap'}});
-  root.append(btn('List device, monitor and MIDI IDs',async()=>{
-    const d=await request('state','GET');hardware.textContent=[...(d.audio?.devices || []).map(i=>i.direction+': '+i.name+'\n'+i.id),...(d.monitors || []).map(i=>'Monitor: '+i.name+'\n'+i.id),...(d.midi || []).map(i=>'MIDI: '+i.name+'\n'+i.id)].join('\n\n');if(d.hardwareLoading)hardware.textContent+='\nHardware discovery is running; refresh shortly.';
+  root.append(btn(t('s.c.listIds'),async()=>{
+    const d=await request('state','GET');hardware.textContent=[...(d.audio?.devices || []).map(i=>i.direction+': '+i.name+'\n'+i.id),...(d.monitors || []).map(i=>'Monitor: '+i.name+'\n'+i.id),...(d.midi || []).map(i=>'MIDI: '+i.name+'\n'+i.id)].join('\n\n');if(d.hardwareLoading)hardware.textContent+='\n'+t('s.c.discovering');
   }),hardware);
 }
 
@@ -2476,24 +2505,24 @@ function appearanceEditor(owner, parents, label, widget = false) {
     const style = h('select', { 'aria-label': t('s.ap.surface'), onchange: e => {
       if (e.target.value) owner.appearance = { style: e.target.value }; else delete owner.appearance;
       update(); render();
-    } }, ...[['', 'Inherit / current look'], ['default', 'Original appearance'], ['cards', 'Rounded cards'], ['flat', 'Flat surfaces'], ['borderless', 'Content only'], ['seamless', 'Seamless panel']]
+    } }, ...[['', t('s.ap.sInherit')], ['default', t('s.ap.sDefault')], ['cards', t('s.ap.sCards')], ['flat', t('s.ap.sFlat')], ['borderless', t('s.ap.sBorderless')], ['seamless', t('s.ap.sSeamless')]]
       .map(([value, text]) => h('option', { value, selected: (owner.appearance?.style || '') === value }, text)));
     const fields = [h('div', { class: 'field' }, h('label', {}, t('s.ap.surface')), style)];
-    const fontLabels = { default: 'Original font', sans: 'Sans-serif', rounded: 'Rounded', condensed: 'Condensed', serif: 'Serif', mono: 'Monospace' };
+    const fontLabels = { default: t('s.u.fontDefault'), sans: 'Sans-serif', rounded: t('s.u.fontRounded'), condensed: t('s.u.fontCondensed'), serif: 'Serif', mono: 'Monospace' };
     const inheritedFont = (() => {
       const inherited = { ...(owner.appearance || {}) }; delete inherited.font;
       return PhoneBoxAppearance.resolve(...parents(), inherited).font;
     })();
     fields.push(h('div', { class: 'field' }, h('label', {}, t('s.ap.font')),
-      h('select', { 'aria-label': 'Font', onchange: e => { set('font', e.target.value || null); render(); } },
-        h('option', { value: '', selected: owner.appearance?.font == null }, !inheritedFont || inheritedFont === 'default' ? 'Original widget font' : 'Inherit (' + fontLabels[inheritedFont] + ')'),
+      h('select', { 'aria-label': t('s.ap.font'), onchange: e => { set('font', e.target.value || null); render(); } },
+        h('option', { value: '', selected: owner.appearance?.font == null }, !inheritedFont || inheritedFont === 'default' ? t('s.u.origFont') : t('s.u.inheritValue', { value: fontLabels[inheritedFont] })),
         ...Object.entries(fontLabels).map(([value, text]) => h('option', { value, selected: owner.appearance?.font === value }, text)))));
     const numeric = (key, title, max, fallback, min = 0, step = 1, unit = ' px') => {
       const value = current[key];
-      const output = h('output', { style: { minWidth: '80px', fontVariantNumeric: 'tabular-nums' } }, value == null ? 'Automatic' : value + unit);
+      const output = h('output', { style: { minWidth: '80px', fontVariantNumeric: 'tabular-nums' } }, value == null ? t('s.u.automatic') : value + unit);
       const input = h('input', { type: 'range', min, max, step, value: value ?? fallback, 'aria-label': title, style: { flex: '1', minWidth: '60px' } });
       input.oninput = () => { set(key, Number(input.value)); output.textContent = input.value + unit; };
-      const reset = h('button', { type: 'button', class: 'btn sm', 'aria-label': 'Inherit ' + title.toLowerCase(), onclick: () => { set(key, null); render(); } }, t('s.ap.inherit'));
+      const reset = h('button', { type: 'button', class: 'btn sm', 'aria-label': t('s.ap.inherit') + ' ' + title.toLowerCase(), onclick: () => { set(key, null); render(); } }, t('s.ap.inherit'));
       fields.push(h('div', { class: 'field' }, h('label', {}, title), h('div', { class: 'row', style: { gap: '10px' } }, input, output, reset)));
     };
     numeric('fontScale', t('s.ap.fontSize'), 200, 100, 50, 5, '%');
@@ -2507,12 +2536,12 @@ function appearanceEditor(owner, parents, label, widget = false) {
       const fallback = PhoneBoxAppearance.resolve(...parents(), inherited)[key];
       fields.push(h('div', { class: 'field' }, h('label', {}, title),
         h('select', { 'aria-label': title, onchange: e => set(key, e.target.value === '' ? null : e.target.value === 'true') },
-          h('option', { value: '', selected: value == null }, fallback == null ? 'Original widget default' : 'Inherit (' + (fallback ? 'on' : 'off') + ')'),
-          h('option', { value: 'true', selected: value === true }, 'On'), h('option', { value: 'false', selected: value === false }, 'Off'))));
+          h('option', { value: '', selected: value == null }, fallback == null ? t('s.u.origDefault') : t('s.u.inheritValue', { value: fallback ? t('s.u.on') : t('s.u.off') })),
+          h('option', { value: 'true', selected: value === true }, t('s.u.on')), h('option', { value: 'false', selected: value === false }, t('s.u.off')))));
     }
     root.replaceChildren(h('summary', {}, label), h('p', { class: 'hint' }, widget
-      ? 'Overrides the page and global appearance. Inherit restores the preset or parent value.'
-      : 'Choose a preset, then adjust individual values. Safe areas and page navigation remain reserved.'), ...fields,
+      ? t('s.u.apWidgetHint')
+      : t('s.u.apHint')), ...fields,
       h('button', { type: 'button', class: 'btn sm', onclick: () => { delete owner.appearance; update(); render(); } }, t('s.appearance.reset')));
   };
   render(); return root;
@@ -2525,13 +2554,13 @@ function renderAppearanceSettings() {
   const editor = appearanceEditor(cfg.display, () => [], t('s.appearance.global'));
   editor.open = true;
   const preview = h('div', { class: 'preview', hidden: true });
-  const selector = h('select', { id: 'appearancePreviewPage', 'aria-label': 'Appearance preview page', onchange: queuePreview },
+  const selector = h('select', { id: 'appearancePreviewPage', 'aria-label': t('s.u.apPreviewPage'), onchange: queuePreview },
     ...(cfg.pages || []).map((p, index) => p.enabled !== false ? h('option', { value: index }, p.title) : null));
   const toggle = h('button', { type: 'button', class: 'btn', onclick: () => {
     preview.hidden = !preview.hidden;
     toggle.textContent = preview.hidden ? t('s.appearance.showPreview') : t('s.appearance.hidePreview');
     if (!appearancePreviewFrame && !preview.hidden) {
-      appearancePreviewFrame = h('iframe', { src: '../panel/?preview=1', title: 'Live appearance preview' });
+      appearancePreviewFrame = h('iframe', { src: '../panel/?preview=1', title: t('s.u.apPreviewTitle') });
       preview.append(appearancePreviewFrame);
       const frame = appearancePreviewFrame;
       appearancePreviewObserver = new ResizeObserver(() => { frame.style.transform = 'scale(' + preview.clientWidth / 780 + ')'; });
@@ -2577,6 +2606,9 @@ function applyLanguageUi(langPref) {
   if ($('langSel')) $('langSel').value = I18n.getPref();
   if ($('displayLangSel')) $('displayLangSel').value = I18n.getPref();
   I18n.applyDom();
+  // paragraphs with inline <b>/<code>/<a>: the text comes from our own dictionary, never from settings or the network
+  for (const el of document.querySelectorAll('[data-i18n-html]')) el.innerHTML = I18n.t(el.dataset.i18nHtml);
+  if ($('updRepo')) $('updRepo').textContent = cfg?.updates?.repo || 'ersinkoc/phonebox'; // lives inside a translated paragraph
 }
 
 function bindLanguage() {
@@ -2598,6 +2630,10 @@ function bindLanguage() {
     renderFeeds();
     renderConsole();
     renderCharge();
+    renderPhones();
+    renderNetAdapters();
+    pollCharge();
+    loadInfo(); // the phone pill, Wi-Fi status, hook state and file paths are written by loadInfo, not by data-i18n
     if (typeof queuePreview === 'function') queuePreview();
     changed();
   };
@@ -2674,39 +2710,39 @@ async function loadInfo() {
     $('ver').textContent = 'v' + i.version;
     const pill = $('phone');
     pill.className = 'pill' + (i.connected ? ' on' : '');
-    pill.querySelector('span').textContent = i.connected ? 'Phone connected' + (i.via ? ' · ' + i.via : '') : 'No phone connected';
+    pill.querySelector('span').textContent = i.connected ? t('s.u.phoneConnected') + (i.via ? ' · ' + i.via : '') : t('s.u.noPhone');
     osName = i.os || 'windows';
     $('followComputerLockOption').style.display = osName === 'macos' ? '' : 'none';
-    $('adbFound').textContent = i.adb ? 'Found: ' + i.adb : 'adb not found — ' + ({ linux: 'sudo apt install adb', macos: 'brew install android-platform-tools' }[osName] || 'winget install Google.PlatformTools');
+    $('adbFound').textContent = i.adb ? t('s.cn.found', { path: i.adb }) : t('s.cn.noAdb') + ' — ' + ({ linux: 'sudo apt install adb', macos: 'brew install android-platform-tools' }[osName] || 'winget install Google.PlatformTools');
     $('appMissing').hidden = !(i.appMissing && i.appMissing.length);
     $('usbProblem').hidden = !i.usbProblem;
     $('usbProblem').replaceChildren(...(i.usbProblem ? [icon('warning-triangle', 'm'), i.usbProblem] : []));
     $('webviewProblem').hidden = !i.webviewProblem;
     $('webviewProblem').replaceChildren(...(i.webviewProblem ? [icon('warning-triangle', 'm'), i.webviewProblem] : []));
-    if (i.appMissing?.length) $('appMissingText').textContent = `${i.appMissing.join(', ')} has no PhoneBox app yet`;
+    if (i.appMissing?.length) $('appMissingText').textContent = t('s.cn.appMissing', { phones: i.appMissing.join(', ') });
     const sel = $('serial');
     const cur = cfg.deviceSerial || '';
-    const opts = [['', 'All connected devices'], ...i.devices.map((d) => [d, d])];
-    if (cur && !i.devices.includes(cur)) opts.push([cur, cur + ' (not connected)']);
+    const opts = [['', t('s.u.allDevices')], ...i.devices.map((d) => [d, d])];
+    if (cur && !i.devices.includes(cur)) opts.push([cur, cur + ' ' + t('s.u.notConnected')]);
     sel.replaceChildren(...opts.map(([v, l]) => h('option', { value: v, selected: v === cur }, l)));
     sel.onchange = () => { cfg.deviceSerial = sel.value || null; changed(); };
     const lan = await (await fetch('/api/lan')).json();
     $('lanHosts').textContent = lan.hosts.length
       ? lan.hosts.map((a) => a.startsWith('100.') ? a + ' (Tailscale)' : a).join(', ')
-      : 'No LAN or Tailscale address found';
-    $('lanStatus').textContent = lan.active ? `Listening on port ${lan.port} (HTTPS)` : lan.configured ? 'Restart to start listening' : 'Off';
+      : t('s.u.noLan');
+    $('lanStatus').textContent = lan.active ? t('s.u.listening', { port: lan.port }) : lan.configured ? t('s.u.restartToListen') : t('s.u.off');
     $('restartBtn').hidden = !lan.restartNeeded;
     renderUpdate(await (await fetch('/api/update')).json());
     renderWebhooks(lan);
     const hk = await (await fetch('/api/claude/hook')).json();
-    $('hookState').textContent = hk.installed ? 'Installed in ' + hk.path : 'Not installed';
+    $('hookState').textContent = hk.installed ? t('s.u.installedIn', { path: hk.path }) : t('s.u.notInstalled');
     $('hookBtn').dataset.i18n = hk.installed ? 's.claude.removeHook' : 's.claude.installHook';
     $('hookBtn').textContent = t($('hookBtn').dataset.i18n);
     $('hookBtn').dataset.installed = hk.installed ? '1' : '';
     $('info').replaceChildren(
-      h('dt', {}, 'Version'), h('dd', {}, i.version),
-      h('dt', {}, 'Settings file'), h('dd', {}, h('code', {}, i.configPath)),
-      h('dt', {}, 'Log'), h('dd', {}, h('code', {}, i.logPath)),
+      h('dt', {}, t('s.u.version')), h('dd', {}, i.version),
+      h('dt', {}, t('s.u.settingsFile')), h('dd', {}, h('code', {}, i.configPath)),
+      h('dt', {}, t('s.u.log')), h('dd', {}, h('code', {}, i.logPath)),
       h('dt', {}, 'adb'), h('dd', {}, i.adb || '—'));
   } catch (_) {}
 }
@@ -2775,15 +2811,15 @@ function renderUpdate(u) {
   $('updRepo').textContent = cfg.updates?.repo || 'ersinkoc/phonebox';
   const line = (k, v) => [h('dt', {}, k), h('dd', {}, v)];
   $('updInfo').replaceChildren(
-    ...line('Agent', s.agentVersion + (s.agentUpdate ? ` → ${s.latest}` : ' (up to date)') + (u.installed ? '' : ' · not the installed copy, updates itself only from %LOCALAPPDATA%\\PhoneBox\\app')),
-    ...line('Phone app', s.appVersion ? s.appVersion + (s.appUpdate ? ` → ${s.latest} (needs USB)` : ' (up to date)') : 'not seen yet'),
-    ...line('Latest release', s.latest ? s.latest : '—'),
-    ...line('Last check', s.lastCheck ? new Date(s.lastCheck).toLocaleString() : 'not yet'));
+    ...line('Agent', s.agentVersion + (s.agentUpdate ? ` → ${s.latest}` : ' ' + t('s.up.current')) + (u.installed ? '' : ' · ' + t('s.up.notInstalled'))),
+    ...line(t('s.up.phoneApp'), s.appVersion ? s.appVersion + (s.appUpdate ? ` → ${s.latest} ` + t('s.up.needsUsb') : ' ' + t('s.up.current')) : t('s.up.notSeen')),
+    ...line(t('s.up.latest'), s.latest ? s.latest : '—'),
+    ...line(t('s.up.lastCheck'), s.lastCheck ? new Date(s.lastCheck).toLocaleString() : t('s.up.notYet')));
   $('updApply').hidden = !(s.agentUpdate || s.appUpdate);
   $('updState').textContent = s.error ? s.error : s.state !== 'idle' ? s.state + '…' : '';
 }
 $('updCheck').onclick = async () => {
-  $('updState').textContent = 'checking…';
+  $('updState').textContent = t('s.up.checking');
   await fetch('/api/update/check', { method: 'POST' });
   loadInfo();
 };
@@ -2812,16 +2848,16 @@ $('hookBtn').onclick = async () => {
   const remove = !!$('hookBtn').dataset.installed;
   const r = await fetch('/api/claude/hook', { method: remove ? 'DELETE' : 'POST' });
   const j = await r.json().catch(() => ({}));
-  r.ok ? toast(remove ? 'Hook removed' : 'Hook installed — new Claude Code sessions pick it up') : toast(j.error || 'Could not change the hook', true);
+  r.ok ? toast(remove ? t('s.u.hookRemoved') : t('s.u.hookInstalled')) : toast(j.error || t('s.u.hookFailed'), true);
   loadInfo();
 };
 $('modalClose').onclick = closeModal;
 $('lanPair').onclick = pairOverWifi;
 $('modal').onclick = (e) => { if (e.target.id === 'modal') closeModal(); };
 const whTry = (fn, ok) => async () => { try { await fn(); toast(ok); loadPushed(); } catch (e) { toast(e.message, true); } };
-$('whNotify').onclick = whTry(() => postJson('/api/notify', { title: 'PhoneBox', text: 'Hello from the settings page', level: 'ok' }), 'Sent — look at the phone');
-$('whPush').onclick = whTry(() => postJson('/api/push/demo', { value: Math.round(Math.random() * 100), unit: '%', sub: 'sent ' + new Date().toLocaleTimeString() }), 'Pushed "demo"');
-$('whRefresh').onclick = whTry(() => postJson('/api/refresh'), 'The panel refreshes');
+$('whNotify').onclick = whTry(() => postJson('/api/notify', { title: 'PhoneBox', text: 'Hello from the settings page', level: 'ok' }), t('s.u.sentLook'));
+$('whPush').onclick = whTry(() => postJson('/api/push/demo', { value: Math.round(Math.random() * 100), unit: '%', sub: 'sent ' + new Date().toLocaleTimeString() }), t('s.u.pushedDemo'));
+$('whRefresh').onclick = whTry(() => postJson('/api/refresh'), t('s.u.panelRefreshes'));
 $('whReload').onclick = whTry(() => postJson('/api/refresh?reload=1'), 'The panel reloads');
 $('whClear').onclick = async () => { if (!confirm(t('s.js.deletePushed'))) return; await fetch('/api/push', { method: 'DELETE' }); loadPushed(); };
 setInterval(loadPushed, 4000);
