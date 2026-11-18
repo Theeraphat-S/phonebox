@@ -75,6 +75,23 @@ public sealed class IconEncodingTests
         }
     }
 
+    [Fact]
+    public void DefaultShortcutsWithTheirOldEmojiGetTheIconsTheDefaultsUseNow()
+    {
+        using var f = new Fixture(new AgentConfig { Shortcuts = [
+            new() { Id = "terminal", Icon = "⌨️", Cmd = "wt.exe" },
+            new() { Id = "explorer", Icon = "📁", Cmd = "explorer.exe" },
+            new() { Id = "taskmgr", Icon = "📊", Cmd = "taskmgr.exe" },
+            new() { Id = "lock", Icon = "🔒", Cmd = "builtin:lock" },
+            new() { Id = "settings", Icon = "âš™ï¸\u008f", Cmd = "ms-settings:" }, // ANSI-damaged ⚙️: repaired, then upgraded
+            new() { Id = "my-files", Icon = "📁", Cmd = "explorer.exe" },  // the same emoji on the user's own shortcut stays
+            new() { Id = "lock-2", Icon = "🔒", Cmd = "builtin:lock" },
+            new() { Id = "mute", Icon = "🔈", Cmd = "builtin:mute" },     // a default shortcut with another emoji stays
+        ] });
+        Assert.Equal(["icon:terminal", "icon:folder", "icon:column-chart", "icon:lock", "icon:settings", "📁", "🔒", "🔈"],
+            f.Store.Get().Shortcuts.Select(s => s.Icon));
+    }
+
     private sealed class Fixture : IDisposable
     {
         private readonly string _dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "phonebox-icons-" + Guid.NewGuid().ToString("N"));

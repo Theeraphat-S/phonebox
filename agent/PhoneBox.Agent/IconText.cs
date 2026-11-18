@@ -11,6 +11,30 @@ internal static class IconText
     private static readonly Dictionary<string, string> Repairs = BuildRepairs();
     public static string Repair(string? value) => value is not null && Repairs.TryGetValue(value, out var icon) ? icon : value ?? "";
 
+    // The emoji the default shortcuts shipped with up to 0.9.17, by shortcut id (Windows, Linux and macOS defaults),
+    // and the icon that replaced each one. Only that exact pair is upgraded: an emoji a user chose for any other
+    // shortcut is left as it is.
+    private static readonly Dictionary<(string Id, string Emoji), string> OldDefaults = new()
+    {
+        [("terminal", "⌨️")] = "icon:terminal",
+        [("explorer", "📁")] = "icon:folder",
+        [("files", "📁")] = "icon:folder",
+        [("vscode", "📝")] = "icon:code",
+        [("browser", "🌐")] = "icon:globe",
+        [("spotify", "🎧")] = "icon:headphones",
+        [("calc", "🧮")] = "icon:calculator",
+        [("settings", "⚙️")] = "icon:settings",
+        [("snip", "✂️")] = "icon:scissors",
+        [("taskmgr", "📊")] = "icon:column-chart",
+        [("monitor", "📊")] = "icon:column-chart",
+        [("mute", "🔇")] = "icon:volume-off",
+        [("monitoroff", "🌙")] = "icon:moon",
+        [("lock", "🔒")] = "icon:lock",
+    };
+
+    /// <summary>A default shortcut that still has its old default emoji gets the icon the defaults use now.</summary>
+    public static string UpgradeDefault(string id, string icon) => OldDefaults.TryGetValue((id, icon), out var name) ? name : icon;
+
     private static Dictionary<string, string> BuildRepairs()
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);

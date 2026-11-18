@@ -7,6 +7,9 @@
   same on every device and work offline. Widgets, page tabs, shortcut keys, rule presets and the catalog use them.
   An emoji or a few letters you typed yourself still works as an icon; the settings page has a new icon picker that
   saves a built-in icon.
+- The default shortcut keys (Terminal, Files, VS Code, Browser, Spotify, Calculator, Settings, Snip, Task Manager,
+  Mute, Screen Off, Lock) use IconMCP icons too. A default key that still has its old emoji gets the new icon when the
+  agent reads the settings; an emoji on any other key stays as it is.
 - Thai (ไทย): the panel, the settings page, the widget and template catalog and the phone's pairing dialog are
   translated, and a Thai README joins the others. Noto Sans Thai (SIL OFL) is bundled, so Thai text looks the same on
   every phone and works offline; Thai text is never letter-spaced, which would pull tone marks off their letters.
